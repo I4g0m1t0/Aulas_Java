@@ -124,6 +124,15 @@ public class Menu {
         System.out.println("Categorias cadastradas:");
         for (Categoria categoria : categorias) {
             System.out.println("ID: " + categoria.IdCategoria + ", Descrição: " + categoria.Descricao);
+
+            Integer contagemAnimais = 0;
+            
+            for (Animal animal : animais){
+                if (animal.IdCategoria.IdCategoria.equals(categoria.IdCategoria)) {
+                    contagemAnimais++;
+                }
+            }
+            System.out.println("Contagem de animais nessa categoria: " + contagemAnimais);
         }
     }
 
@@ -131,6 +140,16 @@ public class Menu {
         System.out.println("Tutores cadastrados:");
         for (Tutor tutor : tutores) {
             System.out.println("ID: " + tutor.IdTutor + ", Nome: " + tutor.Nome);
+
+            Integer contagemAnimais = 0;
+
+            for (Animal animal : animais) {
+                if (animal.IdTutor.IdTutor.equals(tutor.IdTutor)) {
+                    contagemAnimais++;
+                }
+            }
+
+            System.out.println("Contagem de animais desse tutor: " + contagemAnimais);
         }
     }
 
