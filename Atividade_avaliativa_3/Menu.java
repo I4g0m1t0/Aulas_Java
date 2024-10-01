@@ -139,7 +139,7 @@ public class Menu {
                 }
             }
 
-            System.out.println("Contagem de cursos desse professor: " + contagemCurso);
+            System.out.println("\nContagem de cursos desse professor: " + contagemCurso);
         }
     }
 
