@@ -1,4 +1,8 @@
 import java.util.Scanner;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 
 public class Menu {
@@ -57,7 +61,7 @@ public class Menu {
                             Curso curso = new Curso(IdCurso, nomeCurso, CH, professorCurso);
                             cursos.add(curso);
                         } else {
-                            System.out.println("Professor não encontrado!");
+                            System.out.println("Professor não encontrado! Faça o cadastro novamente");
                         }
                         break;
                     case 3:
@@ -65,12 +69,31 @@ public class Menu {
                         int IdAluno = scanner.nextInt();
                         System.out.println("Digite o nome do aluno: ");
                         String nomeAluno = scanner.next();
-                        System.out.println("Digite a data de nascimento do aluno: ");
+                        System.out.println("Digite a data de nascimento do aluno no formato dd/MM/yyyy: ");
                         String DtNascAluno = scanner.next();
+                        
+                        //Como fiz para comparar a string https://www.alura.com.br/artigos/como-converter-string-para-date-em-java?srsltid=AfmBOor8xaPmxiB0JvWtRicWGnvk_55Q-qb5qlmhRxhOv7SghQOK01ej
+                        
+                        while (true) {
+                            System.out.println("Digite a data de nascimento do aluno no formato dd/MM/yyyy: ");
+                            DtNascAluno = scanner.next();
+
+                            try {
+                                DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy"); //Formato padrão
+                                LocalDate data = LocalDate.parse(DtNascAluno, formato); //Compara a string com o formato
+                                formato.format(data); //Formata a string
+                                break; //Sai do loop se o formato estiver correto
+                            } catch (DateTimeParseException e) {
+                                System.out.println("Formato inválido ou data inexistente. Tente novamente."); //Captura a exceção e informa o usuário
+                            }
+                        }
+                        
+
                         System.out.println("Digite o CPF do aluno: ");
                         String CpfAluno = scanner.next();
                         System.out.println("Digite o Id do curso do aluno: ");
                         int IdCursoAluno = scanner.nextInt();
+                        calcularIdade(DtNascAluno); //Calcula a idade do aluno, mas só funciona se a string for informada como dd//MM//yyyy
 
                         Curso cursoAluno = buscaCurso(IdCursoAluno);
 
@@ -79,7 +102,7 @@ public class Menu {
                             alunos.add(aluno);
                             System.out.println("Aluno cadastrado.");
                         } else {
-                            System.out.println("Curso não encontrado!.");
+                            System.out.println("Curso não encontrado! Faça o cadastro novamente");
                         }
                         break;
                     case 4:
@@ -159,6 +182,22 @@ public class Menu {
                                 "\nData de nascimento: " + aluno.DtNasc + 
                                 "\nCPF: " + aluno.CPF + 
                                 "\nNome do curso: " + aluno.IdCurso.Nome);
+        }
+    }
+
+    // cálculo da idade baseada no vídeo da URL https://www.youtube.com/watch?v=SU3Tp_y_0es
+
+    private static void calcularIdade(String DtNascAluno){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy"); //Formatação
+
+        try {
+            LocalDate dataConvertida = LocalDate.parse(DtNascAluno, formatter); //Formata a string para date
+            LocalDate dataAtual = LocalDate.now(); //Pega a data de hoje
+            Period idade = Period.between(dataConvertida, dataAtual); //Calcula o tempo que passou entre o dia de hoje e o dia de nascimento
+
+            System.out.println("A idade do aluno é: " + idade.getYears() + " anos");
+        } catch (Exception e) {
+            System.out.println("Formato de data inválido. Por favor, tente novamente.");
         }
     }
 }
