@@ -172,28 +172,36 @@ public class Menu {
             System.out.println("\nNome do professor: " + professor.Nome + 
                                 " Departamento: " + professor.Departamento);
 
-            Integer contagemCurso = 0;
-            Integer contagemAlunos = 0;
+            int contagemCurso = 0;
 
             for (Curso curso : cursos) {
-                if (curso.IdProfessor.IdProfessor.equals(professor.IdProfessor)) {
+                if (curso.IdProfessor.IdProfessor == professor.IdProfessor) {
                     contagemCurso++;
+                    System.out.println("Curso: " + curso.Nome);
+    
+                    int contagemAlunos = 0;
+
                     for (Aluno aluno : alunos) {
-                        if (aluno.IdCurso.equals(curso.IdCurso)) { // Ajustado para verificar o IdCurso
+                        if (aluno.IdCurso.IdCurso == curso.IdCurso) {  // Corrigido para comparar os IDs corretamente
                             contagemAlunos++;
                         }
                     }
+    
+                    System.out.println("Quantidade de alunos no curso: " + contagemAlunos);
                 }   
             }
+    
+            if (contagemCurso == 0) {
+                System.out.println("Este professor não está associado a nenhum curso.");
+            } else {
+                System.out.println("Contagem de cursos desse professor: " + contagemCurso);
+            }
 
-            System.out.println("Contagem de cursos desse professor: " + contagemCurso);
-            System.out.println("Contagem de cursos desse professor: " + contagemAlunos);
-
-            //Desafio 03
+            // Desafio 03
             int contagemCHCurso = 0;
 
             for (Curso curso : cursos) {
-                if (curso.IdProfessor.IdProfessor.equals(professor.IdProfessor)) {
+                if (curso.IdProfessor.IdProfessor == professor.IdProfessor) {
                     contagemCHCurso += curso.CH;
                 }
             }
@@ -201,6 +209,7 @@ public class Menu {
             System.out.println("A carga horária total desse professor é: " + contagemCHCurso);
         }
     }
+
 
     private static void listarCursos() {
         System.out.println("Cursos cadastrados:");
