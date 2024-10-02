@@ -112,13 +112,25 @@ public class Menu {
                         }
                         break;
                     case 4:
-                        listarProfessores();
+                        if (professores == null) {
+                            System.out.println("Ainda não existem professores cadastrados");
+                        } else {
+                            listarProfessores();
+                        }
                         break;
                     case 5: 
-                        listarCursos();
+                        if (cursos == null) {
+                            System.out.println("Ainda não existem cursos cadastrados");
+                        } else {
+                            listarCursos();
+                        }
                         break;
                     case 6:
-                        listarAlunos();
+                        if (alunos == null) {
+                            System.out.println("Ainda não existem alunos cadastrados");
+                        } else {
+                            listarAlunos();
+                        }
                         break;
                     case 7:
                         System.out.println("Encerrando...");
