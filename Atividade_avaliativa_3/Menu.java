@@ -89,11 +89,11 @@ public class Menu {
                         }
                         
 
-                        System.out.println("Digite o CPF do aluno: ");
+                        System.out.println("Digite o CPF do aluno (O cpf deve conter 11 caracteres): ");
                         String CpfAluno = scanner.next();
 
                         while (validaCPF(CpfAluno) != true) {
-                            System.out.println("Digite o CPF do aluno: ");
+                            System.out.println("Digite o CPF do aluno (O cpf deve conter 11 caracteres): ");
                             CpfAluno = scanner.next();
                         }
                         
@@ -157,8 +157,8 @@ public class Menu {
     private static void listarProfessores() {
         System.out.println("Professores cadastrados:");
         for (Professor professor : professores) {
-            System.out.println("Nome do professor: " + professor.Nome + 
-                                "\nDepartamento: " + professor.Departamento);
+            System.out.println("\nNome do professor: " + professor.Nome + 
+                                " Departamento: " + professor.Departamento);
 
             Integer contagemCurso = 0;
 
@@ -168,26 +168,37 @@ public class Menu {
                 }
             }
 
-            System.out.println("\nContagem de cursos desse professor: " + contagemCurso);
+            System.out.println("Contagem de cursos desse professor: " + contagemCurso);
+
+            //Desafio 03
+            int contagemCHCurso = 0;
+
+            for (Curso curso : cursos) {
+                if (curso.IdProfessor.IdProfessor.equals(professor.IdProfessor)) {
+                    contagemCHCurso += curso.CH;
+                }
+            }
+
+            System.out.println("A carga horária total desse professor é: " + contagemCHCurso);
         }
     }
 
     private static void listarCursos() {
         System.out.println("Cursos cadastrados:");
         for (Curso curso : cursos) {
-            System.out.println("Nome do curso: " + curso.Nome + 
-                                "\nCarga horária: " + curso.CH + 
-                                "\nNome do professor: " + curso.IdProfessor.Nome);
+            System.out.println("\nNome do curso: " + curso.Nome + 
+                                " Carga horária: " + curso.CH + 
+                                " Nome do professor: " + curso.IdProfessor.Nome);
         }
     }
 
     private static void listarAlunos() {
         System.out.println("Alunos cadastrados:");
         for (Aluno aluno : alunos) {
-            System.out.println("Nome do aluno: " + aluno.Nome + 
-                                "\nData de nascimento: " + aluno.DtNasc + 
-                                "\nCPF: " + aluno.CPF + 
-                                "\nNome do curso: " + aluno.IdCurso.Nome);
+            System.out.println("\nNome do aluno: " + aluno.Nome + 
+                                " Data de nascimento: " + aluno.DtNasc + 
+                                " CPF: " + aluno.CPF + 
+                                " Nome do curso: " + aluno.IdCurso.Nome);
         }
     }
 
