@@ -173,14 +173,21 @@ public class Menu {
                                 " Departamento: " + professor.Departamento);
 
             Integer contagemCurso = 0;
+            Integer contagemAlunos = 0;
 
             for (Curso curso : cursos) {
                 if (curso.IdProfessor.IdProfessor.equals(professor.IdProfessor)) {
                     contagemCurso++;
-                }
+                    for (Aluno aluno : alunos) {
+                        if (aluno.IdCurso.equals(curso.IdCurso)) { // Ajustado para verificar o IdCurso
+                            contagemAlunos++;
+                        }
+                    }
+                }   
             }
 
             System.out.println("Contagem de cursos desse professor: " + contagemCurso);
+            System.out.println("Contagem de cursos desse professor: " + contagemAlunos);
 
             //Desafio 03
             int contagemCHCurso = 0;
