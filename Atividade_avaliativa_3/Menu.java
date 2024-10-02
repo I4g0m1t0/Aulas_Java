@@ -69,11 +69,11 @@ public class Menu {
                         int IdAluno = scanner.nextInt();
                         System.out.println("Digite o nome do aluno: ");
                         String nomeAluno = scanner.next();
-                        System.out.println("Digite a data de nascimento do aluno no formato dd/MM/yyyy: ");
-                        String DtNascAluno = scanner.next();
                         
                         //Como fiz para comparar a string https://www.alura.com.br/artigos/como-converter-string-para-date-em-java?srsltid=AfmBOor8xaPmxiB0JvWtRicWGnvk_55Q-qb5qlmhRxhOv7SghQOK01ej
                         
+                        String DtNascAluno;
+
                         while (true) {
                             System.out.println("Digite a data de nascimento do aluno no formato dd/MM/yyyy: ");
                             DtNascAluno = scanner.next();
@@ -91,6 +91,12 @@ public class Menu {
 
                         System.out.println("Digite o CPF do aluno: ");
                         String CpfAluno = scanner.next();
+
+                        while (validaCPF(CpfAluno) != true) {
+                            System.out.println("Digite o CPF do aluno: ");
+                            CpfAluno = scanner.next();
+                        }
+                        
                         System.out.println("Digite o Id do curso do aluno: ");
                         int IdCursoAluno = scanner.nextInt();
                         calcularIdade(DtNascAluno); //Calcula a idade do aluno, mas só funciona se a string for informada como dd//MM//yyyy
@@ -199,5 +205,13 @@ public class Menu {
         } catch (Exception e) {
             System.out.println("Formato de data inválido. Por favor, tente novamente.");
         }
+    }
+
+    private static boolean validaCPF(String CPF) {
+        if (CPF.length() != 11) {
+            return false;
+        } else {
+            return true;
+        }     
     }
 }
