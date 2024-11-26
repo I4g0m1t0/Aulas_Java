@@ -8,6 +8,13 @@ public class Participante extends Pessoa {
         this.notificacao = notificacao;
     }
 
+    // Construtor sem notificacao
+    public Participante(int id, String nome, String telefone) {
+        super(id, nome);
+        this.telefone = telefone;
+        this.notificacao = null; // Define notificacao como null
+    }
+
     public String getTelefone() {
         return telefone;
     }
