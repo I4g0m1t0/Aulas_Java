@@ -8,6 +8,13 @@ public class Organizador extends Pessoa {
         this.notificacao = notificacao;
     }
 
+    // Construtor sem notificacao
+    public Organizador(int id, String nome, String email) {
+        super(id, nome);
+        this.email = email;
+        this.notificacao = null; // Define notificacao como null
+    }
+
     public String getEmail() {
         return email;
     }

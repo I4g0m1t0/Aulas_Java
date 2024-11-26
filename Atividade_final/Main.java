@@ -20,10 +20,11 @@ public class Main {
             System.out.println("2. SELECT COM PREP STATEMENT");
             System.out.println("3. INSERT COM STATEMENT");
             System.out.println("4. Inserir Participante");
-            System.out.println("5. UPDATE COM STATEMENT");
-            System.out.println("6. UPDATE COM PREP STATEMENT");
-            System.out.println("7. DELETE COM STATEMENT");
-            System.out.println("8. DELETE COM PREP STATEMENT");
+            System.out.println("5. Inserir Organizador");
+            System.out.println("6. UPDATE COM STATEMENT");
+            System.out.println("7. UPDATE COM PREP STATEMENT");
+            System.out.println("8. DELETE COM STATEMENT");
+            System.out.println("9. DELETE COM PREP STATEMENT");
             try{
                 menu = scanner.nextInt();
             } catch (Exception e) {
@@ -123,6 +124,35 @@ public class Main {
                     }
                     break;
                 case 5:
+                    try {
+                        System.out.println("Informe o nome do organizador");
+                        String nome = scanner.next();
+                        System.out.println("Informe o email do organizador");
+                        String email = scanner.next();
+                        
+                        Connection con = DriverManager.getConnection(url, user, password);
+                        PreparedStatement stm = con.prepareStatement("INSERT INTO organizador "
+                            + "(nome, email) VALUES "
+                            + "(?,?)", PreparedStatement.RETURN_GENERATED_KEYS);
+                        stm.setString(1, nome);
+                        stm.setString(2, email);
+                        if (stm.executeUpdate() > 0) {
+                            ResultSet rs = stm.getGeneratedKeys();
+
+                            if (rs.next()) {
+                                System.out.println(new Participante(
+                                    rs.getInt("id"),
+                                    rs.getString("nome"),
+                                    rs.getString("email")
+                                )); 
+                            }
+                        }
+                        con.close();
+                    } catch (SQLException e) {
+                        System.out.println(e.getMessage());
+                    }
+                    break;
+                case 6:
                     // try {
                     //     System.out.println("Informe o ID de alteração: ");
                     //     int id = scanner.nextInt();
@@ -178,7 +208,7 @@ public class Main {
                     //     System.out.println(e.getMessage());
                     // }
                     break;
-                case 6:
+                case 7:
                     // try {
                     //     System.out.println("Informe o ID de alteração: ");
                     //     int id = scanner.nextInt();
@@ -238,7 +268,7 @@ public class Main {
                     //     System.out.println(e.getMessage());
                     // }
                     break;
-                case 7:
+                case 8:
                     // try {
                     //     System.out.println("Informe o ID de exclusão: ");
                     //     int id = scanner.nextInt();
@@ -267,7 +297,7 @@ public class Main {
                     //     System.out.println(e.getMessage());
                     // }
                     break;
-                case 8:
+                case 9:
                 //     try {
                 //         System.out.println("Informe o ID de exclusão: ");
                 //         int id = scanner.nextInt();
