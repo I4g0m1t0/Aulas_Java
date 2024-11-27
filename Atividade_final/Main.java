@@ -21,6 +21,8 @@ public class Main {
             System.out.println("3. INSERT COM STATEMENT");
             System.out.println("4. Inserir Participante");
             System.out.println("5. Inserir Organizador");
+            System.out.println("10. Inserir Local");
+            System.out.println("11. Inserir Evento");
             System.out.println("6. UPDATE COM STATEMENT");
             System.out.println("7. UPDATE COM PREP STATEMENT");
             System.out.println("8. DELETE COM STATEMENT");
@@ -328,6 +330,44 @@ public class Main {
                 // default:
                 //     System.out.println("Operação inválida.");
                     break;
+                case 10:
+                    try {
+                        System.out.println("Informe a descrição do local:");
+                        scanner.nextLine(); // Para limpar o buffer caso venha de um nextInt()
+                        String descricaoLocal = scanner.nextLine();
+                        
+                        System.out.println("Informe a quantidade de vagas do local:");
+                        int vagas = scanner.nextInt();
+                    
+                        Connection con = DriverManager.getConnection(url, user, password);
+                        PreparedStatement stm = con.prepareStatement(
+                            "INSERT INTO local (descricao, vagas) VALUES (?, ?)", 
+                            PreparedStatement.RETURN_GENERATED_KEYS
+                        );
+                    
+                        stm.setString(1, descricaoLocal);
+                        stm.setInt(2, vagas);
+                    
+                        if (stm.executeUpdate() > 0) {
+                            ResultSet rs = stm.getGeneratedKeys();
+                            if (rs.next()) {
+                                // Cria o objeto Local com os valores retornados
+                                Local novoLocal = new Local(
+                                    rs.getInt(1), // Obtém o ID gerado automaticamente
+                                    descricaoLocal,
+                                    vagas
+                                );
+                                System.out.println("Local cadastrado com sucesso!");
+                                System.out.println(novoLocal);
+                            }
+                            rs.close();
+                        }
+                        stm.close();
+                        con.close();
+                    } catch (SQLException e) {
+                        System.out.println("Erro ao acessar o banco de dados: " + e.getMessage());
+                    }
+                break;
             }
         } while (menu != 0);
         scanner.close();

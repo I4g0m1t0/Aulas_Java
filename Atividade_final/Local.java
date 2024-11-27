@@ -6,11 +6,7 @@ public class Local {
     private int vagas;
     private ArrayList<Evento> eventos;
 
-    public Local(
-        int id, 
-        String descricao,
-        int vagas
-        ) {
+    public Local(int id, String descricao, int vagas) {
         this.id = id;
         this.descricao = descricao;
         this.vagas = vagas;
