@@ -3,7 +3,11 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
+import java.sql.Timestamp;
+
 
 public class Main {
 
@@ -368,6 +372,121 @@ public class Main {
                         System.out.println("Erro ao acessar o banco de dados: " + e.getMessage());
                     }
                 break;
+                case 11:
+                    try {
+                        Connection con = DriverManager.getConnection(url, user, password);
+                        int organizadorId, localId, vagasEvento;
+
+                        // Verificação do Organizador
+                        while (true) {
+                            System.out.println("Informe o ID do Organizador:");
+                            organizadorId = scanner.nextInt();
+                            String buscarOrganizadorSQL = "SELECT * FROM Organizador WHERE id = ?";
+                            PreparedStatement stmBuscarOrganizador = con.prepareStatement(buscarOrganizadorSQL);
+                            stmBuscarOrganizador.setInt(1, organizadorId);
+                            ResultSet rsOrganizador = stmBuscarOrganizador.executeQuery();
+
+                            if (rsOrganizador.next()) {
+                                System.out.println("Organizador encontrado: " + rsOrganizador.getString("nome"));
+                                break; // Sai do loop se o organizador for encontrado
+                            } else {
+                                System.out.println("Organizador não encontrado. Tente novamente.");
+                            }
+
+                            rsOrganizador.close();
+                            stmBuscarOrganizador.close();
+                        }
+
+                        // Verificação do Local
+                        while (true) {
+                            System.out.println("Informe o ID do Local:");
+                            localId = scanner.nextInt();
+                            String buscarLocalSQL = "SELECT * FROM Local WHERE id = ?";
+                            PreparedStatement stmBuscarLocal = con.prepareStatement(buscarLocalSQL);
+                            stmBuscarLocal.setInt(1, localId);
+                            ResultSet rsLocal = stmBuscarLocal.executeQuery();
+
+                            if (rsLocal.next()) {
+                                System.out.println("Local encontrado: " + rsLocal.getString("descricao"));
+                                break; // Sai do loop se o local for encontrado
+                            } else {
+                                System.out.println("Local não encontrado. Tente novamente.");
+                            }
+
+                            rsLocal.close();
+                            stmBuscarLocal.close();
+                        }
+
+                        // Dados do Evento
+                        System.out.println("Informe a data do evento (yyyy-MM-dd HH:mm:ss):");
+                        scanner.nextLine(); // Limpar o buffer
+                        String dataEvento = scanner.nextLine();
+
+                        System.out.println("Informe a descrição do evento:");
+                        String descricaoEvento = scanner.nextLine();
+
+                        //Vagas do evento
+                        while (true) {
+                            String buscarLocalSQL = "SELECT * FROM Local WHERE id = ?";
+                            PreparedStatement stmBuscarLocal = con.prepareStatement(buscarLocalSQL);
+                            stmBuscarLocal.setInt(1, localId);
+                            ResultSet rsLocal = stmBuscarLocal.executeQuery();
+
+                            if (rsLocal.next()) {
+                                System.out.println("Local selecionado: " + rsLocal.getString("descricao"));
+                                int vagasDisponiveis = rsLocal.getInt("vagas");
+                                System.out.println("Vagas disponíveis no local: " + vagasDisponiveis);
+                        
+                                // Solicitar o número de vagas para o evento
+                                System.out.println("Informe a quantidade de vagas do evento:");
+                                vagasEvento = scanner.nextInt();
+                        
+                                // Verificar se o número de vagas do evento é permitido
+                                if (vagasEvento <= vagasDisponiveis) {
+                                    System.out.println("Número de vagas aceito.");
+                                    break; // Sai do loop se as vagas forem válidas
+                                } else {
+                                    System.out.println("Número de vagas excede o limite do local. Tente novamente.");
+                                }
+                            } else {
+                                System.out.println("Local não encontrado. Tente novamente.");
+                            }
+                        
+                            rsLocal.close();
+                            stmBuscarLocal.close();
+                        }
+
+                        // Preparando a inserção do Evento
+                        String inserirEventoSQL = "INSERT INTO Evento (organizador_id, local_id, data, descricao, vagas) VALUES (?, ?, ?, ?, ?)";
+                        PreparedStatement stmInserirEvento = con.prepareStatement(inserirEventoSQL, PreparedStatement.RETURN_GENERATED_KEYS);
+
+                        // Convertendo String para LocalDateTime
+                        LocalDateTime dataEventoParsed = LocalDateTime.parse(dataEvento, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+                        stmInserirEvento.setInt(1, organizadorId);
+                        stmInserirEvento.setInt(2, localId);
+                        stmInserirEvento.setTimestamp(3, Timestamp.valueOf(dataEventoParsed));
+                        stmInserirEvento.setString(4, descricaoEvento);
+                        stmInserirEvento.setInt(5, vagasEvento);
+
+                        if (stmInserirEvento.executeUpdate() > 0) {
+                            ResultSet rsEvento = stmInserirEvento.getGeneratedKeys();
+                            if (rsEvento.next()) {
+                                System.out.println("Evento cadastrado com sucesso! ID: " + rsEvento.getInt(1));
+                            }
+                            rsEvento.close();
+                        }
+
+                        // Fechar conexões
+                        stmInserirEvento.close();
+                        con.close();
+
+                    } catch (SQLException e) {
+                        System.out.println("Erro ao acessar o banco de dados: " + e.getMessage());
+                    } catch (Exception e) {
+                        System.out.println("Erro inesperado: " + e.getMessage());
+                    }
+              break;
             }
         } while (menu != 0);
         scanner.close();
