@@ -186,6 +186,8 @@ public class Main {
                         scanner.nextLine(); // Limpar o buffer
                         String dataEvento = scanner.nextLine();
 
+                        //Verificar se já existe algum evento cadastrado no dia: 
+
                         System.out.println("Informe a descrição do evento:");
                         String descricaoEvento = scanner.nextLine();
 
