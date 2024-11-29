@@ -8,7 +8,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 import java.sql.Timestamp;
 
-
 public class Main {
 
     public static void main(String[] args) throws Exception {
@@ -25,14 +24,18 @@ public class Main {
             System.out.println("3. Inserir Local");
             System.out.println("4. Inserir Evento");
             System.out.println("5. Inserir participante no evento");
-            System.out.println("6. UPDATE COM STATEMENT");
-            System.out.println("7. UPDATE COM PREP STATEMENT");
-            System.out.println("8. DELETE COM STATEMENT");
-            System.out.println("9. DELETE COM PREP STATEMENT");
-            System.out.println("10. SELECT COM STATEMENT");
-            System.out.println("11. SELECT COM PREP STATEMENT");
-            System.out.println("12. INSERT COM STATEMENT");
+            System.out.println("6. Editar Participante");
+            System.out.println("7. Editar Organizador");
+            System.out.println("8. Editar Local");
+            System.out.println("9. Editar Evento");
+            System.out.println("10. Excluir Participante");
+            System.out.println("11. Excluir Organizador");
+            System.out.println("12. Excluir Local");
+            System.out.println("13. Excluir Evento");
+            System.out.println("14. Excluir participante no evento");
+            // System.out.println("15. SELECT COM PREP STATEMENT");
             try{
+                System.out.print("\nDigite a opção desejada: ");
                 menu = scanner.nextInt();
             } catch (Exception e) {
                 System.out.println(e.getMessage());
@@ -352,245 +355,382 @@ public class Main {
                         System.out.println("Erro inesperado: " + e.getMessage());
                     }
                     break;
-                case 6:
-                    // try {
-                    //     System.out.println("Informe o ID de alteração: ");
-                    //     int id = scanner.nextInt();
-                    //     Connection con = DriverManager.getConnection(url, user, password);
-                    //     Statement stm = con.createStatement();
-                    //     ResultSet rs = stm.executeQuery("SELECT * FROM funcionarios WHERE id = " + id);
-                    //     if(!rs.next()) {
-                    //         throw new Exception("Id inválido");
-                    //     }
-                    //     Funcionario funcionario = new Funcionario(
-                    //         rs.getInt("id"),
-                    //         rs.getString("nome"),
-                    //         rs.getString("cpf"),
-                    //         rs.getDate("data_nascimento"),
-                    //         rs.getString("matricula")
-                    //     );
-                    //     con.close();
-                    //     System.out.println("Informe o nome do funcionário (Deixar vazio para manter)");
-                    //     String nome = scanner.next();
-                    //     if (nome.length() > 0){
-                    //         funcionario.setNome(nome);
-                    //     }
-                    //     System.out.println("Informe o CPF do funcionário (Deixar vazio para manter)");
-                    //     String cpf = scanner.next();
-                    //     if (cpf.length() > 0){
-                    //         funcionario.setCpf(cpf);
-                    //     }
-                    //     System.out.println("Informe a Data de Nascimento do funcionário (Deixar vazio para manter)");
-                    //     String dataNascimento = scanner.next();
-                    //     if (dataNascimento.length() > 0){
-                    //         funcionario.setDataNascimento(Date.valueOf(dataNascimento));
-                    //     }
-                    //     System.out.println("Informe o Matricula do funcionário (Deixar vazio para manter)");
-                    //     String matricula = scanner.next();
-                    //     if (matricula.length() > 0){
-                    //         funcionario.setMatricula(matricula);
-                    //     }
-                        
-
-                    //     con = DriverManager.getConnection(url, user, password);
-                    //     stm = con.createStatement();
-                    //     boolean sql = stm.execute("UPDATE funcionarios SET "
-                    //         + " nome = '" + funcionario.getNome() + "'"
-                    //         + ", cpf = '" + funcionario.getCpf() + "'"
-                    //         + ", data_nascimento = '" + funcionario.getDataNascimento() + "'"
-                    //         + ", matricula = '" + funcionario.getMatricula() + "'"
-                    //         + " WHERE id = " + funcionario.getId());
-                    //     if(!sql) {
-                    //         System.out.println("Falha na execução");
-                    //     }
-                    //     con.close();
-                    // } catch (SQLException e) {
-                    //     System.out.println(e.getMessage());
-                    // }
+                               
+                    case 6:
+                    try {
+                        System.out.println("Informe o ID do participante que deseja alterar:");
+                        int idParticipante = scanner.nextInt();
+                
+                        // Pedir os novos dados para atualização
+                        System.out.println("Informe o novo nome (ou pressione Enter para manter o mesmo):");
+                        scanner.nextLine(); // Limpar o buffer
+                        String novoNome = scanner.nextLine();
+                
+                        System.out.println("Informe o novo telefone (ou pressione Enter para manter o mesmo):");
+                        String novoTelefone = scanner.nextLine();
+                
+                        // Conexão com o banco de dados
+                        Connection con = DriverManager.getConnection(url, user, password);
+                
+                        // Montar a consulta SQL dinamicamente
+                        StringBuilder sql = new StringBuilder("UPDATE participante SET ");
+                        boolean adicionarNome = !novoNome.isEmpty();
+                        boolean adicionarTelefone = !novoTelefone.isEmpty();
+                
+                        if (adicionarNome) {
+                            sql.append("nome = ?");
+                        }
+                        if (adicionarTelefone) {
+                            if (adicionarNome) {
+                                sql.append(", ");
+                            }
+                            sql.append("telefone = ?");
+                        }
+                        sql.append(" WHERE id = ?");
+                
+                        // Preparar o Statement
+                        PreparedStatement ps = con.prepareStatement(sql.toString());
+                
+                        int index = 1;
+                
+                        // Definir os parâmetros dinamicamente
+                        if (adicionarNome) {
+                            ps.setString(index++, novoNome);
+                        }
+                        if (adicionarTelefone) {
+                            ps.setString(index++, novoTelefone);
+                        }
+                        ps.setInt(index, idParticipante); // Definir o ID
+                
+                        // Executar o UPDATE
+                        int rowsUpdated = ps.executeUpdate();
+                        if (rowsUpdated > 0) {
+                            System.out.println("Participante atualizado com sucesso!");
+                        } else {
+                            System.out.println("Nenhum participante encontrado com o ID fornecido.");
+                        }
+                
+                        // Fechar recursos
+                        ps.close();
+                        con.close();
+                    } catch (SQLException e) {
+                        System.out.println("Erro ao acessar o banco de dados: " + e.getMessage());
+                    } catch (Exception e) {
+                        System.out.println("Erro inesperado: " + e.getMessage());
+                    }
                     break;
                     case 7:
-                    // try {
-                    //     System.out.println("Informe o ID de alteração: ");
-                    //     int id = scanner.nextInt();
-                    //     Connection con = DriverManager.getConnection(url, user, password);
-                    //     Statement stm = con.createStatement();
-                    //     ResultSet rs = stm.executeQuery("SELECT * FROM funcionarios WHERE id = " + id);
-                    //     if(!rs.next()) {
-                    //         throw new Exception("Id inválido");
-                    //     }
-                    //     Funcionario funcionario = new Funcionario(
-                    //         rs.getInt("id"),
-                    //         rs.getString("nome"),
-                    //         rs.getString("cpf"),
-                    //         rs.getDate("data_nascimento"),
-                    //         rs.getString("matricula")
-                    //     );
-                    //     con.close();
-                    //     System.out.println("Informe o nome do funcionário (Deixar vazio para manter)");
-                    //     String nome = scanner.next();
-                    //     if (nome.length() > 0){
-                    //         funcionario.setNome(nome);
-                    //     }
-                    //     System.out.println("Informe o CPF do funcionário (Deixar vazio para manter)");
-                    //     String cpf = scanner.next();
-                    //     if (cpf.length() > 0){
-                    //         funcionario.setCpf(cpf);
-                    //     }
-                    //     System.out.println("Informe a Data de Nascimento do funcionário (Deixar vazio para manter)");
-                    //     String dataNascimento = scanner.next();
-                    //     if (dataNascimento.length() > 0){
-                    //         funcionario.setDataNascimento(Date.valueOf(dataNascimento));
-                    //     }
-                    //     System.out.println("Informe o Matricula do funcionário (Deixar vazio para manter)");
-                    //     String matricula = scanner.next();
-                    //     if (matricula.length() > 0){
-                    //         funcionario.setMatricula(matricula);
-                    //     }
-                    
-
-                    //     con = DriverManager.getConnection(url, user, password);
-                    //     PreparedStatement pStm = con.prepareStatement("UPDATE funcionarios SET "
-                    //         + " nome = ?"
-                    //         + ", cpf = ?"
-                    //         + ", data_nascimento = ?"
-                    //         + ", matricula = ?"
-                    //         + " WHERE id = ?");
-                    //     pStm.setString(1, funcionario.getNome());
-                    //     pStm.setString(2, funcionario.getCpf());
-                    //     pStm.setDate(3, funcionario.getDataNascimento());
-                    //     pStm.setString(4, funcionario.getMatricula());
-                    //     pStm.setInt(5, funcionario.getId());
-                    //     if (pStm.executeUpdate() <= 0) {
-                    //         System.out.println("Falha na execução.");
-                    //     }
-                    //     con.close();
-                    // } catch (Exception e) {
-                    //     System.out.println(e.getMessage());
-                    // }
+                    try {
+                        System.out.println("Informe o ID do organizador que deseja alterar:");
+                        int idOrganizador = scanner.nextInt();
+                
+                        // Pedir os novos dados para atualização
+                        System.out.println("Informe o novo nome (ou pressione Enter para manter o mesmo):");
+                        scanner.nextLine(); // Limpar o buffer
+                        String novoNomeOrganizador = scanner.nextLine();
+                
+                        System.out.println("Informe o novo email (ou pressione Enter para manter o mesmo):");
+                        String novoEmailOrganizador = scanner.nextLine();
+                
+                        Connection con = DriverManager.getConnection(url, user, password);
+                
+                        StringBuilder sqlOrganizador = new StringBuilder("UPDATE organizador SET ");
+                        boolean atualizarNomeOrg = !novoNomeOrganizador.isEmpty();
+                        boolean atualizarEmailOrg = !novoEmailOrganizador.isEmpty();
+                
+                        if (atualizarNomeOrg) {
+                            sqlOrganizador.append("nome = ?");
+                        }
+                        if (atualizarEmailOrg) {
+                            if (atualizarNomeOrg) {
+                                sqlOrganizador.append(", ");
+                            }
+                            sqlOrganizador.append("email = ?");
+                        }
+                        sqlOrganizador.append(" WHERE id = ?");
+                
+                        PreparedStatement psOrganizador = con.prepareStatement(sqlOrganizador.toString());
+                
+                        int indexOrg = 1;
+                        if (atualizarNomeOrg) {
+                            psOrganizador.setString(indexOrg++, novoNomeOrganizador);
+                        }
+                        if (atualizarEmailOrg) {
+                            psOrganizador.setString(indexOrg++, novoEmailOrganizador);
+                        }
+                        psOrganizador.setInt(indexOrg, idOrganizador);
+                
+                        int rowsUpdatedOrg = psOrganizador.executeUpdate();
+                        if (rowsUpdatedOrg > 0) {
+                            System.out.println("Organizador atualizado com sucesso!");
+                        } else {
+                            System.out.println("Nenhum organizador encontrado com o ID fornecido.");
+                        }
+                
+                        psOrganizador.close();
+                        con.close();
+                    } catch (SQLException e) {
+                        System.out.println("Erro ao acessar o banco de dados: " + e.getMessage());
+                    }
                     break;
+                
                 case 8:
-                    // try {
-                    //     System.out.println("Informe o ID de exclusão: ");
-                    //     int id = scanner.nextInt();
-                    //     Connection con = DriverManager.getConnection(url, user, password);
-                    //     Statement stm = con.createStatement();
-                    //     ResultSet rs = stm.executeQuery("SELECT * FROM funcionarios WHERE id = " + id);
-                        
-                    //     if(!rs.next()) {
-                    //         throw new Exception("Id inválido");
-                    //     }
-                    //     Funcionario funcionario = new Funcionario(
-                    //         rs.getInt("id"),
-                    //         rs.getString("nome"),
-                    //         rs.getString("cpf"),
-                    //         rs.getDate("data_nascimento"),
-                    //         rs.getString("matricula")
-                    //     );
-                    //     stm = con.createStatement();
-                    //     boolean sql = stm.execute("DELETE FROM funcionarios "
-                    //         + " WHERE id = " + funcionario.getId());
-                    //     if(!sql) {
-                    //         System.out.println("Falha na execução");
-                    //     }
-                    //     con.close();
-                    // } catch (SQLException e) {
-                    //     System.out.println(e.getMessage());
-                    // }
+                    try {
+                        System.out.println("Informe o ID do local que deseja alterar:");
+                        int idLocal = scanner.nextInt();
+                
+                        System.out.println("Informe a nova descrição (ou pressione Enter para manter o mesmo):");
+                        scanner.nextLine(); // Limpar o buffer
+                        String novaDescricaoLocal = scanner.nextLine();
+                
+                        System.out.println("Informe o novo número de vagas (ou pressione Enter para manter o mesmo):");
+                        String novasVagas = scanner.nextLine();
+                
+                        Connection con = DriverManager.getConnection(url, user, password);
+                
+                        StringBuilder sqlLocal = new StringBuilder("UPDATE local SET ");
+                        boolean atualizarDescricaoLocal = !novaDescricaoLocal.isEmpty();
+                        boolean atualizarVagas = !novasVagas.isEmpty();
+                
+                        if (atualizarDescricaoLocal) {
+                            sqlLocal.append("descricao = ?");
+                        }
+                        if (atualizarVagas) {
+                            if (atualizarDescricaoLocal) {
+                                sqlLocal.append(", ");
+                            }
+                            sqlLocal.append("vagas = ?");
+                        }
+                        sqlLocal.append(" WHERE id = ?");
+                
+                        PreparedStatement psLocal = con.prepareStatement(sqlLocal.toString());
+                
+                        int indexLocal = 1;
+                        if (atualizarDescricaoLocal) {
+                            psLocal.setString(indexLocal++, novaDescricaoLocal);
+                        }
+                        if (atualizarVagas) {
+                            psLocal.setInt(indexLocal++, Integer.parseInt(novasVagas));
+                        }
+                        psLocal.setInt(indexLocal, idLocal);
+                
+                        int rowsUpdatedLocal = psLocal.executeUpdate();
+                        if (rowsUpdatedLocal > 0) {
+                            System.out.println("Local atualizado com sucesso!");
+                        } else {
+                            System.out.println("Nenhum local encontrado com o ID fornecido.");
+                        }
+                
+                        psLocal.close();
+                        con.close();
+                    } catch (SQLException e) {
+                        System.out.println("Erro ao acessar o banco de dados: " + e.getMessage());
+                    }
                     break;
+                
                 case 9:
-                //     try {
-                //         System.out.println("Informe o ID de exclusão: ");
-                //         int id = scanner.nextInt();
-                //         Connection con = DriverManager.getConnection(url, user, password);
-                //         Statement stm = con.createStatement();
-                //         ResultSet rs = stm.executeQuery("SELECT * FROM funcionarios WHERE id = " + id);
+                    try {
+                        System.out.println("Informe o ID do evento que deseja alterar:");
+                        int idEvento = scanner.nextInt();
+                
+                        System.out.println("Informe a nova descrição (ou pressione Enter para manter o mesmo):");
+                        scanner.nextLine(); // Limpar o buffer
+                        String novaDescricaoEvento = scanner.nextLine();
+                
+                        System.out.println("Informe a nova data (yyyy-MM-dd HH:mm:ss ou pressione Enter para manter a mesma):");
+                        String novaDataEvento = scanner.nextLine();
+                
+                        System.out.println("Informe o novo número de vagas (ou pressione Enter para manter o mesmo):");
+                        String novasVagasEvento = scanner.nextLine();
+                
+                        Connection con = DriverManager.getConnection(url, user, password);
+                
+                        StringBuilder sqlEvento = new StringBuilder("UPDATE evento SET ");
+                        boolean atualizarDescricaoEvento = !novaDescricaoEvento.isEmpty();
+                        boolean atualizarDataEvento = !novaDataEvento.isEmpty();
+                        boolean atualizarVagasEvento = !novasVagasEvento.isEmpty();
+                
+                        if (atualizarDescricaoEvento) {
+                            sqlEvento.append("descricao = ?");
+                        }
+                        if (atualizarDataEvento) {
+                            if (atualizarDescricaoEvento) {
+                                sqlEvento.append(", ");
+                            }
+                            sqlEvento.append("data = ?");
+                        }
+                        if (atualizarVagasEvento) {
+                            if (atualizarDescricaoEvento || atualizarDataEvento) {
+                                sqlEvento.append(", ");
+                            }
+                            sqlEvento.append("vagas = ?");
+                        }
+                        sqlEvento.append(" WHERE id = ?");
+                
+                        PreparedStatement psEvento = con.prepareStatement(sqlEvento.toString());
+                
+                        int indexEvento = 1;
+                        if (atualizarDescricaoEvento) {
+                            psEvento.setString(indexEvento++, novaDescricaoEvento);
+                        }
+                        if (atualizarDataEvento) {
+                            psEvento.setTimestamp(indexEvento++, Timestamp.valueOf(novaDataEvento));
+                        }
+                        if (atualizarVagasEvento) {
+                            psEvento.setInt(indexEvento++, Integer.parseInt(novasVagasEvento));
+                        }
+                        psEvento.setInt(indexEvento, idEvento);
+                
+                        int rowsUpdatedEvento = psEvento.executeUpdate();
+                        if (rowsUpdatedEvento > 0) {
+                            System.out.println("Evento atualizado com sucesso!");
+                        } else {
+                            System.out.println("Nenhum evento encontrado com o ID fornecido.");
+                        }
+                
+                        psEvento.close();
+                        con.close();
+                    } catch (SQLException e) {
+                        System.out.println("Erro ao acessar o banco de dados: " + e.getMessage());
+                    }
+                    break;
+                    case 10:
+                    try {
+                        System.out.println("Informe o ID do Participante que deseja excluir:");
+                        int idParticipanteExcluir = scanner.nextInt();
                         
-                //         if(!rs.next()) {
-                //             throw new Exception("Id inválido");
-                //         }
-                //         Funcionario funcionario = new Funcionario(
-                //             rs.getInt("id"),
-                //             rs.getString("nome"),
-                //             rs.getString("cpf"),
-                //             rs.getDate("data_nascimento"),
-                //             rs.getString("matricula")
-                //         );
-                //         PreparedStatement pStm = con.prepareStatement("DELETE FROM funcionarios WHERE id = ?");
-                //         pStm.setInt(1, funcionario.getId());
-                //         if(pStm.executeUpdate() <= 0) {
-                //             System.out.println("Falha na execução.");
-                //         }
-                //         con.close();
-                //     } catch (Exception e) {
-                //         System.out.println(e.getMessage());
-                //     }
-                //     break;
-                // default:
-                //     System.out.println("Operação inválida.");
+                        Connection con = DriverManager.getConnection(url, user, password);
+                        
+                        String deleteParticipanteSQL = "DELETE FROM participante WHERE id = ?";
+                        PreparedStatement psExcluirParticipante = con.prepareStatement(deleteParticipanteSQL);
+                        psExcluirParticipante.setInt(1, idParticipanteExcluir);
+                
+                        int rowsAffected = psExcluirParticipante.executeUpdate();
+                        if (rowsAffected > 0) {
+                            System.out.println("Participante excluído com sucesso!");
+                        } else {
+                            System.out.println("Nenhum participante encontrado com o ID informado.");
+                        }
+                
+                        psExcluirParticipante.close();
+                        con.close();
+                    } catch (SQLException e) {
+                        System.out.println("Erro ao acessar o banco de dados: " + e.getMessage());
+                    } catch (Exception e) {
+                        System.out.println("Erro inesperado: " + e.getMessage());
+                    }
                     break;
-                case 10:
-                    // try {
-                    //     Connection con = DriverManager.getConnection(url, user, password);
-                    //     Statement stm = con.createStatement();
-                    //     ResultSet sql = stm.executeQuery("SELECT * FROM funcionarios;");
-                    //     while(sql.next()) {
-                    //         System.out.println(new Funcionario(
-                    //             sql.getInt("id"),
-                    //             sql.getString("nome"),
-                    //             sql.getString("cpf"),
-                    //             sql.getDate("data_nascimento"),
-                    //             sql.getString("matricula")
-                    //         ));
-                    //     }
-                    //     con.close();
-                    // } catch (SQLException e) {
-                    //     System.out.println(e.getMessage());
-                    // }
-                    break;
+                
                 case 11:
-                    // try {
-                    //     Connection con = DriverManager.getConnection(url, user, password);
-                    //     PreparedStatement stm = con.prepareStatement("SELECT * FROM funcionarios;");
-                    //     ResultSet sql = stm.executeQuery();
-                    //     while(sql.next()) {
-                    //         System.out.println(new Funcionario(
-                    //             sql.getInt("id"),
-                    //             sql.getString("nome"),
-                    //             sql.getString("cpf"),
-                    //             sql.getDate("data_nascimento"),
-                    //             sql.getString("matricula")
-                    //         ));
-                    //     }
-                    //     con.close();
-                    // } catch (SQLException e) {
-                    //     System.out.println(e.getMessage());
-                    // }
+                    try {
+                        System.out.println("Informe o ID do Organizador que deseja excluir:");
+                        int idOrganizadorExcluir = scanner.nextInt();
+                        
+                        Connection con = DriverManager.getConnection(url, user, password);
+                        
+                        String deleteOrganizadorSQL = "DELETE FROM organizador WHERE id = ?";
+                        PreparedStatement psExcluirOrganizador = con.prepareStatement(deleteOrganizadorSQL);
+                        psExcluirOrganizador.setInt(1, idOrganizadorExcluir);
+                
+                        int rowsAffected = psExcluirOrganizador.executeUpdate();
+                        if (rowsAffected > 0) {
+                            System.out.println("Organizador excluído com sucesso!");
+                        } else {
+                            System.out.println("Nenhum organizador encontrado com o ID informado.");
+                        }
+                
+                        psExcluirOrganizador.close();
+                        con.close();
+                    } catch (SQLException e) {
+                        System.out.println("Erro ao acessar o banco de dados: " + e.getMessage());
+                    } catch (Exception e) {
+                        System.out.println("Erro inesperado: " + e.getMessage());
+                    }
                     break;
+                
                 case 12:
-                    // try {
-                    //     System.out.println("Informe o nome do funcionário");
-                    //     String nome = scanner.next();
-                    //     System.out.println("Informe o CPF do funcionário");
-                    //     String cpf = scanner.next();
-                    //     System.out.println("Informe a Data de Nascimento do funcionário");
-                    //     String dataNascimento = scanner.next();
-                    //     System.out.println("Informe o Matricula do funcionário");
-                    //     String matricula = scanner.next();
+                    try {
+                        System.out.println("Informe o ID do Local que deseja excluir:");
+                        int idLocalExcluir = scanner.nextInt();
                         
+                        Connection con = DriverManager.getConnection(url, user, password);
                         
-                    //     Connection con = DriverManager.getConnection(url, user, password);
-                    //     Statement stm = con.createStatement();
-                    //     boolean sql = stm.execute("INSERT INTO funcionarios "
-                    //         + "(nome, cpf, data_nascimento, matricula) VALUES "
-                    //         + "('"+nome+"', '"+cpf+"', '"+dataNascimento+"', '"+matricula+"')");
-                    //     if(!sql) {
-                    //         System.out.println("Falha na execução");
-                    //     }
-                    //     con.close();
-                    // } catch (SQLException e) {
-                    //     System.out.println(e.getMessage());
-                    // }
+                        String deleteLocalSQL = "DELETE FROM local WHERE id = ?";
+                        PreparedStatement psExcluirLocal = con.prepareStatement(deleteLocalSQL);
+                        psExcluirLocal.setInt(1, idLocalExcluir);
+                
+                        int rowsAffected = psExcluirLocal.executeUpdate();
+                        if (rowsAffected > 0) {
+                            System.out.println("Local excluído com sucesso!");
+                        } else {
+                            System.out.println("Nenhum local encontrado com o ID informado.");
+                        }
+                
+                        psExcluirLocal.close();
+                        con.close();
+                    } catch (SQLException e) {
+                        System.out.println("Erro ao acessar o banco de dados: " + e.getMessage());
+                    } catch (Exception e) {
+                        System.out.println("Erro inesperado: " + e.getMessage());
+                    }
                     break;
+                
+                case 13:
+                    try {
+                        System.out.println("Informe o ID do Evento que deseja excluir:");
+                        int idEventoExcluir = scanner.nextInt();
+                        
+                        Connection con = DriverManager.getConnection(url, user, password);
+                        
+                        String deleteEventoSQL = "DELETE FROM evento WHERE id = ?";
+                        PreparedStatement psExcluirEvento = con.prepareStatement(deleteEventoSQL);
+                        psExcluirEvento.setInt(1, idEventoExcluir);
+                
+                        int rowsAffected = psExcluirEvento.executeUpdate();
+                        if (rowsAffected > 0) {
+                            System.out.println("Evento excluído com sucesso!");
+                        } else {
+                            System.out.println("Nenhum evento encontrado com o ID informado.");
+                        }
+                
+                        psExcluirEvento.close();
+                        con.close();
+                    } catch (SQLException e) {
+                        System.out.println("Erro ao acessar o banco de dados: " + e.getMessage());
+                    } catch (Exception e) {
+                        System.out.println("Erro inesperado: " + e.getMessage());
+                    }
+                    break;
+                
+                case 14:
+                    try {
+                        System.out.println("Informe o ID do Evento:");
+                        int idEvento = scanner.nextInt();
+                        System.out.println("Informe o ID do Participante que deseja excluir do evento:");
+                        int idParticipante = scanner.nextInt();
+                        
+                        Connection con = DriverManager.getConnection(url, user, password);
+                        
+                        String deleteEventoParticipanteSQL = "DELETE FROM evento_participante WHERE evento_id = ? AND participante_id = ?";
+                        PreparedStatement psExcluirEventoParticipante = con.prepareStatement(deleteEventoParticipanteSQL);
+                        psExcluirEventoParticipante.setInt(1, idEvento);
+                        psExcluirEventoParticipante.setInt(2, idParticipante);
+                
+                        int rowsAffected = psExcluirEventoParticipante.executeUpdate();
+                        if (rowsAffected > 0) {
+                            System.out.println("Associação entre participante e evento excluída com sucesso!");
+                        } else {
+                            System.out.println("Nenhuma associação encontrada com os IDs informados.");
+                        }
+                
+                        psExcluirEventoParticipante.close();
+                        con.close();
+                    } catch (SQLException e) {
+                        System.out.println("Erro ao acessar o banco de dados: " + e.getMessage());
+                    } catch (Exception e) {
+                        System.out.println("Erro inesperado: " + e.getMessage());
+                    }
+                    break;                
             }
         } while (menu != 0);
         scanner.close();
