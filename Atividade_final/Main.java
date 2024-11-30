@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 import java.sql.Timestamp;
 
@@ -32,7 +33,7 @@ public class Main {
             System.out.println("11. Excluir Organizador");
             System.out.println("12. Excluir Local");
             System.out.println("13. Excluir Evento");
-            System.out.println("14. Excluir participante no evento");
+            System.out.println("14. Excluir participante do evento");
             // System.out.println("15. SELECT COM PREP STATEMENT");
             try{
                 System.out.print("\nDigite a opção desejada: ");
@@ -184,13 +185,27 @@ public class Main {
                             stmBuscarLocal.close();
                         }
 
-                        // Dados do Evento
-                        System.out.println("Informe a data do evento (yyyy-MM-dd HH:mm:ss):");
-                        scanner.nextLine(); // Limpar o buffer
-                        String dataEvento = scanner.nextLine();
+                        String dataEvento;
+
+                        // Caso tenha usado nextInt ou métodos semelhantes antes
+                        scanner.nextLine(); // Limpa o buffer antes de solicitar a data
+
+                        while (true) {
+                            System.out.println("Informe a data do evento (yyyy-MM-dd HH:mm:ss):");
+                            dataEvento = scanner.nextLine();
+
+                            try {
+                                // Usar um formatter rigoroso para validar o formato
+                                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                                LocalDateTime.parse(dataEvento, formatter);
+                                System.out.println("Data válida.");
+                                break; // Sai do loop se a data for válida
+                            } catch (DateTimeParseException e) {
+                                System.out.println("Data inválida! Por favor, use o formato yyyy-MM-dd HH:mm:ss.");
+                            }
+                        }
 
                         //Verificar se já existe algum evento cadastrado no dia: 
-
                         System.out.println("Informe a descrição do evento:");
                         String descricaoEvento = scanner.nextLine();
 
