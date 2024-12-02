@@ -34,6 +34,11 @@ public class Main {
             System.out.println("12. Excluir Local");
             System.out.println("13. Excluir Evento");
             System.out.println("14. Excluir participante do evento");
+            //implementações necessárias
+            System.out.println("15. Selecionar evento"); //carrega as informações do evento e os participantes cadastrados
+            System.out.println("16. Selecionar participantes"); //lista de participantes
+            System.out.println("17. Selecionar organizadores"); //lista de organizadores
+            System.out.println("18. Selecionar locais"); //lista de locais
             // System.out.println("15. SELECT COM PREP STATEMENT");
             try{
                 System.out.print("\nDigite a opção desejada: ");
