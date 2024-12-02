@@ -193,15 +193,34 @@ public class Main {
                         while (true) {
                             System.out.println("Informe a data do evento (yyyy-MM-dd HH:mm:ss):");
                             dataEvento = scanner.nextLine();
-
+                        
                             try {
                                 // Usar um formatter rigoroso para validar o formato
                                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                                LocalDateTime.parse(dataEvento, formatter);
-                                System.out.println("Data válida.");
-                                break; // Sai do loop se a data for válida
+                                LocalDateTime dataEventoFormatada = LocalDateTime.parse(dataEvento, formatter);
+
+                                // Verificar se a data já está no banco de dados
+                                String verificarDataSQL = "SELECT COUNT(*) AS total FROM Evento WHERE DATE(data) = ? AND local_id = ?";
+                                PreparedStatement stmVerificarData = con.prepareStatement(verificarDataSQL);
+                                stmVerificarData.setDate(1, java.sql.Date.valueOf(dataEventoFormatada.toLocalDate())); // Passando apenas a data
+                                stmVerificarData.setInt(2, localId);
+                                ResultSet rsData = stmVerificarData.executeQuery();
+
+                                if (rsData.next() && rsData.getInt("total") > 0) {
+                                    System.out.println("Data já cadastrada para este local. Escolha outra data.");
+                                } else {
+                                    System.out.println("Data válida.");
+                                    rsData.close();
+                                    stmVerificarData.close();
+                                    break; // Sai do loop se a data for válida e não estiver no banco
+                                }
+
+                                rsData.close();
+                                stmVerificarData.close();
                             } catch (DateTimeParseException e) {
                                 System.out.println("Data inválida! Por favor, use o formato yyyy-MM-dd HH:mm:ss.");
+                            } catch (SQLException e) {
+                                System.out.println("Erro ao verificar a data no banco de dados: " + e.getMessage());
                             }
                         }
 
