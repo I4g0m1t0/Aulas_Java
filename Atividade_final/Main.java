@@ -36,9 +36,9 @@ public class Main {
             System.out.println("14. Excluir participante do evento");
             //implementações necessárias
             System.out.println("15. Selecionar participantes"); //lista de participantes
-            System.out.println("16. Selecionar evento"); //carrega as informações do evento e os participantes cadastrados
-            System.out.println("17. Selecionar organizadores"); //lista de organizadores
-            System.out.println("18. Selecionar locais"); //lista de locais
+            System.out.println("16. Selecionar organizadores"); //lista de organizadores
+            System.out.println("17. Selecionar locais"); //lista de locais
+            System.out.println("18. Selecionar evento"); //carrega as informações do evento e os participantes cadastrados
             // System.out.println("15. SELECT COM PREP STATEMENT");
             try{
                 System.out.print("\nDigite a opção desejada: ");
@@ -831,31 +831,57 @@ public class Main {
                     }
                     break;
                 case 15:
-                try {
-                    Connection con = DriverManager.getConnection(url, user, password);
-                    PreparedStatement stm = con.prepareStatement("SELECT * FROM participante;");
-                    ResultSet sql = stm.executeQuery();
-                
-                    while (sql.next()) {
-                        int id = sql.getInt("id");
-                        String nome = sql.getString("nome");
-                        String telefone = sql.getString("telefone");
-                        int notificacoesDb = sql.getInt("notificacao_id");
-                
-                        // Usa o método estático para criar uma instância de Notifica
-                        Notifica notificacao = Notifica.fromInt(notificacoesDb);
-                
-                        Participante participante = new Participante(id, nome, telefone, notificacao);
-                        System.out.println(participante);
+                    try {
+                        Connection con = DriverManager.getConnection(url, user, password);
+                        PreparedStatement stm = con.prepareStatement("SELECT * FROM participante;");
+                        ResultSet sql = stm.executeQuery();
+                    
+                        while (sql.next()) {
+                            int id = sql.getInt("id");
+                            String nome = sql.getString("nome");
+                            String telefone = sql.getString("telefone");
+                            int notificacoesDb = sql.getInt("notificacao_id");
+                    
+                            // Usa o método estático para criar uma instância de Notifica
+                            Notifica notificacao = Notifica.fromInt(notificacoesDb);
+                    
+                            Participante participante = new Participante(id, nome, telefone, notificacao);
+                            System.out.println(participante);
+                        }
+                    
+                        sql.close();
+                        stm.close();
+                        con.close();
+                    } catch (SQLException e) {
+                        System.out.println("Erro de SQL: " + e.getMessage());
                     }
-                
-                    sql.close();
-                    stm.close();
-                    con.close();
-                } catch (SQLException e) {
-                    System.out.println("Erro de SQL: " + e.getMessage());
-                }
-                break;                
+                break;
+                case 16:
+                    try {
+                        Connection con = DriverManager.getConnection(url, user, password);
+                        PreparedStatement stm = con.prepareStatement("SELECT * FROM organizador;");
+                        ResultSet sql = stm.executeQuery();
+                    
+                        while (sql.next()) {
+                            int id = sql.getInt("id");
+                            String nome = sql.getString("nome");
+                            String telefone = sql.getString("email");
+                            int notificacoesDb = sql.getInt("notificacao_id");
+                    
+                            // Usa o método estático para criar uma instância de Notifica
+                            Notifica notificacao = Notifica.fromInt(notificacoesDb);
+                    
+                            Organizador organizador = new Organizador(id, nome, telefone, notificacao);
+                            System.out.println(organizador);
+                        }
+                    
+                        sql.close();
+                        stm.close();
+                        con.close();
+                    } catch (SQLException e) {
+                        System.out.println("Erro de SQL: " + e.getMessage());
+                    }
+                break;          
             }
         } while (menu != 0);
         scanner.close();

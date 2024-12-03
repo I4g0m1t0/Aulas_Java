@@ -29,6 +29,6 @@ public class Pessoa {
     @Override
     public String toString() {
         return "Id: " + this.getId()
-        + "Nome: " + this.getNome();
+        + ", Nome: " + this.getNome();
     }
 }
