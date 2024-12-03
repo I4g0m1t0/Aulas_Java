@@ -52,10 +52,19 @@ public class Local {
 
     @Override
     public String toString() {
-        return "Local ID: " + id +
+        StringBuilder eventosStr = new StringBuilder();
+        for (Evento evento : eventos) {
+            eventosStr.append(evento.getDescricao())
+                    .append(" em ")
+                    .append(evento.getData())
+                    .append(" organizado por ")
+                    .append(evento.getOrganizador().getNome())
+                    .append("\n");
+        }
+        return "Local [ID: " + id +
             ", Descrição: " + descricao +
             ", Vagas: " + vagas +
-            ", Eventos: " + (eventos.isEmpty() ? "Nenhum evento" : eventos);
+            "]\nEventos:\n" +
+            (eventos.isEmpty() ? "Nenhum evento cadastrado." : eventosStr.toString());
     }
-
 }

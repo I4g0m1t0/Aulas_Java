@@ -91,4 +91,19 @@ public class Evento {
     public void setVagas(int vagas) {
         this.vagas = vagas;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder participantesStr = new StringBuilder();
+        for (Participante participante : participantes) {
+            participantesStr.append(participante.toString()).append("\n");
+        }
+        return "Evento [ID: " + id + 
+            ", Descrição: " + descricao + 
+            ", Data: " + data + 
+            ", Local: " + (local != null ? local.getDescricao() : "Não definido") + 
+            ", Organizador: " + (organizador != null ? organizador.getNome() : "Não definido") + 
+            ", Vagas Disponíveis: " + (vagas - participantes.size()) + 
+            "]\nParticipantes:\n" + (participantes.isEmpty() ? "Nenhum participante." : participantesStr.toString());
+    }
 }

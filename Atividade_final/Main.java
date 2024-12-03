@@ -889,15 +889,51 @@ public class Main {
                         ResultSet sql = stm.executeQuery();
                     
                         while (sql.next()) {
-                            int id = sql.getInt("id"); // Obtém o ID do local
-                            String descricao = sql.getString("descricao"); // Obtém a descrição do local
-                            int vagas = sql.getInt("vagas"); // Obtém o número de vagas como inteiro
+                            int id = sql.getInt("id");
+                            String descricao = sql.getString("descricao");
+                            int vagas = sql.getInt("vagas");
                         
-                            // Cria o objeto Local com os valores obtidos
+                            // Cria o Local
                             Local local = new Local(id, descricao, vagas);
-                            System.out.println(local); // Imprime o objeto Local, chamando o método toString()
-                        }
                         
+                            // Busca eventos associados a este local
+                            PreparedStatement stmEventos = con.prepareStatement("SELECT * FROM evento WHERE local_id = ?");
+                            stmEventos.setInt(1, id);
+                            ResultSet eventosRs = stmEventos.executeQuery();
+                        
+                            while (eventosRs.next()) {
+                                int eventoId = eventosRs.getInt("id");
+                                String eventoDescricao = eventosRs.getString("descricao");
+                                LocalDateTime data = eventosRs.getTimestamp("data").toLocalDateTime();
+                                int vagasEvento = eventosRs.getInt("vagas");
+                        
+                                // Busca o organizador do evento
+                                PreparedStatement stmOrganizador = con.prepareStatement("SELECT * FROM organizador WHERE id = ?");
+                                stmOrganizador.setInt(1, eventosRs.getInt("organizador_id"));
+                                ResultSet organizadorRs = stmOrganizador.executeQuery();
+                        
+                                Organizador organizador = null;
+                                if (organizadorRs.next()) {
+                                    int orgId = organizadorRs.getInt("id");
+                                    String nomeOrg = organizadorRs.getString("nome");
+                                    String emailOrg = organizadorRs.getString("email");
+                        
+                                    // Cria o organizador com os dados reais
+                                    organizador = new Organizador(orgId, nomeOrg, emailOrg, null);
+                                }
+                        
+                                organizadorRs.close();
+                        
+                                // Cria o evento e adiciona ao local
+                                Evento evento = new Evento(eventoId, organizador, local, data, eventoDescricao, vagasEvento);
+                                local.adicionarEvento(evento);
+                            }
+                        
+                            eventosRs.close();
+                        
+                            // Exibe o Local com seus eventos
+                            System.out.println(local);
+                        }                                             
                     
                         sql.close();
                         stm.close();
