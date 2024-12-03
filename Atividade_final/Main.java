@@ -942,6 +942,80 @@ public class Main {
                         System.out.println("Erro de SQL: " + e.getMessage());
                     }
                 break;
+                case 18:
+                    try (Connection con = DriverManager.getConnection(url, user, password)) {
+                        // Solicita o ID do evento ao usuário
+                        System.out.print("Informe o ID do evento: ");
+                        int eventoId = Integer.parseInt(System.console().readLine()); // Usando console para entrada de dados
+                    
+                        // Consulta SQL para informações do evento
+                        String sqlEvento = "SELECT e.descricao AS evento_descricao, e.data AS evento_data, e.vagas, " +
+                                            "o.nome AS organizador_nome, l.descricao AS local_descricao " +
+                                            "FROM evento e " +
+                                            "INNER JOIN organizador o ON e.organizador_id = o.id " +
+                                            "INNER JOIN local l ON e.local_id = l.id " +
+                                            "WHERE e.id = ?";
+                    
+                        try (PreparedStatement stmEvento = con.prepareStatement(sqlEvento)) {
+                            stmEvento.setInt(1, eventoId);
+                    
+                            try (ResultSet eventoRs = stmEvento.executeQuery()) {
+                                if (eventoRs.next()) {
+                                    // Exibe informações do evento
+                                    String eventoDescricao = eventoRs.getString("evento_descricao");
+                                    String eventoData = eventoRs.getString("evento_data");
+                                    int vagas = eventoRs.getInt("vagas");
+                                    String organizadorNome = eventoRs.getString("organizador_nome");
+                                    String localDescricao = eventoRs.getString("local_descricao");
+                    
+                                    System.out.println("Informações do Evento (ID: " + eventoId + "):");
+                                    System.out.println("Descrição: " + eventoDescricao);
+                                    System.out.println("Data: " + eventoData);
+                                    System.out.println("Vagas: " + vagas);
+                                    System.out.println("Organizador: " + organizadorNome);
+                                    System.out.println("Local: " + localDescricao);
+                                    System.out.println();
+                    
+                                    // Consulta SQL para os participantes do evento
+                                    String sqlParticipantes = "SELECT p.id, p.nome, p.telefone " +
+                                                            "FROM participante p " +
+                                                            "INNER JOIN evento_participante ep ON ep.participante_id = p.id " +
+                                                            "WHERE ep.evento_id = ?";
+                    
+                                    try (PreparedStatement stmParticipantes = con.prepareStatement(sqlParticipantes)) {
+                                        stmParticipantes.setInt(1, eventoId);
+                    
+                                        try (ResultSet participantesRs = stmParticipantes.executeQuery()) {
+                                            System.out.println("Participantes do Evento:");
+                    
+                                            boolean encontrouParticipantes = false;
+                    
+                                            while (participantesRs.next()) {
+                                                encontrouParticipantes = true;
+                    
+                                                int participanteId = participantesRs.getInt("id");
+                                                String participanteNome = participantesRs.getString("nome");
+                                                String telefone = participantesRs.getString("telefone");
+                    
+                                                System.out.println("ID: " + participanteId + ", Nome: " + participanteNome + ", Telefone: " + telefone);
+                                            }
+                    
+                                            if (!encontrouParticipantes) {
+                                                System.out.println("Nenhum participante encontrado para este evento.");
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    System.out.println("Evento não encontrado com o ID fornecido.");
+                                }
+                            }
+                        }
+                    } catch (SQLException e) {
+                        System.out.println("Erro ao conectar ou executar consulta: " + e.getMessage());
+                    } catch (NumberFormatException e) {
+                        System.out.println("ID do evento inválido.");
+                    }
+                break;
             }
         } while (menu != 0);
         scanner.close();
