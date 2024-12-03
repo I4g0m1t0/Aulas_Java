@@ -34,12 +34,11 @@ public class Main {
             System.out.println("12. Excluir Local");
             System.out.println("13. Excluir Evento");
             System.out.println("14. Excluir participante do evento");
-            //implementações necessárias
             System.out.println("15. Selecionar participantes"); //lista de participantes
             System.out.println("16. Selecionar organizadores"); //lista de organizadores
             System.out.println("17. Selecionar locais"); //lista de locais
             System.out.println("18. Selecionar evento"); //carrega as informações do evento e os participantes cadastrados
-            // System.out.println("15. SELECT COM PREP STATEMENT");
+
             try{
                 System.out.print("\nDigite a opção desejada: ");
                 menu = scanner.nextInt();
@@ -296,106 +295,127 @@ public class Main {
                     }
                     break;
                 case 5:
-                    try {
-                        Connection con = DriverManager.getConnection(url, user, password);
-
-                        int IdEvento, IdParticipante;
-                        String nomeParticipante = "", descricaoEvento = "";
-
-                        // Verificar o participante
-                        while (true) {
-                            System.out.println("Informe o ID do Participante:");
-                            IdParticipante = scanner.nextInt();
-                            
-                            String buscarParticipanteSQL = "SELECT * FROM participante WHERE id = ?";
-                            PreparedStatement stmBuscarParticipante = con.prepareStatement(buscarParticipanteSQL);
-                            stmBuscarParticipante.setInt(1, IdParticipante);
-                            ResultSet rsParticipante = stmBuscarParticipante.executeQuery();
-
-                            if (rsParticipante.next()) {
-                                nomeParticipante = rsParticipante.getString("nome");
-                                System.out.println("Participante encontrado: " + nomeParticipante);
-                                rsParticipante.close();
-                                stmBuscarParticipante.close();
-                                break;
-                            } else {
-                                System.out.println("Participante não encontrado. Tente novamente.");
-                            }
-
+                try {
+                    Connection con = DriverManager.getConnection(url, user, password);
+                
+                    int IdEvento, IdParticipante;
+                    String nomeParticipante = "", descricaoEvento = "";
+                
+                    // Verificar o participante
+                    while (true) {
+                        System.out.println("Informe o ID do Participante:");
+                        IdParticipante = scanner.nextInt();
+                        
+                        String buscarParticipanteSQL = "SELECT * FROM participante WHERE id = ?";
+                        PreparedStatement stmBuscarParticipante = con.prepareStatement(buscarParticipanteSQL);
+                        stmBuscarParticipante.setInt(1, IdParticipante);
+                        ResultSet rsParticipante = stmBuscarParticipante.executeQuery();
+                
+                        if (rsParticipante.next()) {
+                            nomeParticipante = rsParticipante.getString("nome");
+                            System.out.println("Participante encontrado: " + nomeParticipante);
                             rsParticipante.close();
                             stmBuscarParticipante.close();
+                            break;
+                        } else {
+                            System.out.println("Participante não encontrado. Tente novamente.");
                         }
-
-                        // Verificar o evento
-                        while (true) {
-                            System.out.println("Informe o ID do evento que ele irá participar:");
-                            IdEvento = scanner.nextInt();
-                            String buscarEventoSQL = "SELECT * FROM evento WHERE id = ?";
-                            PreparedStatement stmBuscarEvento = con.prepareStatement(buscarEventoSQL);
-                            stmBuscarEvento.setInt(1, IdEvento);
-                            ResultSet rsEvento = stmBuscarEvento.executeQuery();
-
-                            if (rsEvento.next()) {
-                                descricaoEvento = rsEvento.getString("descricao");
-                                System.out.println("Evento encontrado: " + descricaoEvento);
-                                rsEvento.close();
-                                stmBuscarEvento.close();
-                                break;
-                            } else {
-                                System.out.println("Evento não encontrado. Tente novamente.");
-                            }
-
+                    }
+                
+                    // Verificar o evento
+                    while (true) {
+                        System.out.println("Informe o ID do evento que ele irá participar:");
+                        IdEvento = scanner.nextInt();
+                        String buscarEventoSQL = "SELECT * FROM evento WHERE id = ?";
+                        PreparedStatement stmBuscarEvento = con.prepareStatement(buscarEventoSQL);
+                        stmBuscarEvento.setInt(1, IdEvento);
+                        ResultSet rsEvento = stmBuscarEvento.executeQuery();
+                
+                        if (rsEvento.next()) {
+                            descricaoEvento = rsEvento.getString("descricao");
+                            int vagasDisponiveis = rsEvento.getInt("vagas");
+                            System.out.println("Evento encontrado: " + descricaoEvento);
+                            System.out.println("Vagas disponíveis: " + vagasDisponiveis);
                             rsEvento.close();
                             stmBuscarEvento.close();
-                        }
-
-                        // Verificar se a associação já existe
-                        String verificarDuplicataSQL = "SELECT * FROM evento_participante WHERE evento_id = ? AND participante_id = ?";
-                        PreparedStatement stmVerificarDuplicata = con.prepareStatement(verificarDuplicataSQL);
-                        stmVerificarDuplicata.setInt(1, IdEvento);
-                        stmVerificarDuplicata.setInt(2, IdParticipante);
-                        ResultSet rsDuplicata = stmVerificarDuplicata.executeQuery();
-
-                        if (rsDuplicata.next()) {
-                            System.out.printf("O participante '%s' já está associado a este evento. Operação cancelada.", nomeParticipante);
-                        } else {
-                            // Inserir a associação apenas se não for duplicada
-                            
-                            // Confirmação antes de inserir
-                            System.out.printf("Deseja inserir o participante '%s' no evento '%s'? (s/n): ", nomeParticipante, descricaoEvento);
-                            String confirmacao = scanner.next();
-                            
-                            if (confirmacao.equalsIgnoreCase("s")) {
-                                String InserirEventoParticipanteSql = "INSERT INTO evento_participante (evento_id, participante_id) VALUES (?, ?)";
-                                PreparedStatement stmInserirEventoParticipante = con.prepareStatement(InserirEventoParticipanteSql, PreparedStatement.RETURN_GENERATED_KEYS);
-                            
-                                stmInserirEventoParticipante.setInt(1, IdEvento);
-                                stmInserirEventoParticipante.setInt(2, IdParticipante);
-                            
-                                if (stmInserirEventoParticipante.executeUpdate() > 0) {
-                                    System.out.println("Participante associado ao evento com sucesso!");
+                
+                            if (vagasDisponiveis > 0) {
+                                // Verificar se a associação já existe
+                                String verificarDuplicataSQL = "SELECT * FROM evento_participante WHERE evento_id = ? AND participante_id = ?";
+                                PreparedStatement stmVerificarDuplicata = con.prepareStatement(verificarDuplicataSQL);
+                                stmVerificarDuplicata.setInt(1, IdEvento);
+                                stmVerificarDuplicata.setInt(2, IdParticipante);
+                                ResultSet rsDuplicata = stmVerificarDuplicata.executeQuery();
+                
+                                if (rsDuplicata.next()) {
+                                    System.out.printf("O participante '%s' já está associado a este evento. Operação cancelada.", nomeParticipante);
+                                    break; // Adicionado o break aqui
                                 } else {
-                                    System.out.println("Erro ao associar participante ao evento.");
+                                    // Inserir a associação apenas se não for duplicada
+                                    
+                                    // Confirmação antes de inserir
+                                    System.out.printf("Deseja inserir o participante '%s' no evento '%s'? (s/n): ", nomeParticipante, descricaoEvento);
+                                    String confirmacao = scanner.next();
+                                    
+                                    if (confirmacao.equalsIgnoreCase("s")) {
+                                        String InserirEventoParticipanteSql = "INSERT INTO evento_participante (evento_id, participante_id) VALUES (?, ?)";
+                                        PreparedStatement stmInserirEventoParticipante = con.prepareStatement(InserirEventoParticipanteSql, PreparedStatement.RETURN_GENERATED_KEYS);
+                                    
+                                        stmInserirEventoParticipante.setInt(1, IdEvento);
+                                        stmInserirEventoParticipante.setInt(2, IdParticipante);
+                                    
+                                        if (stmInserirEventoParticipante.executeUpdate() > 0) {
+                                            System.out.println("Participante associado ao evento com sucesso!");
+                                            
+                                            // Atualizar o número de vagas disponíveis
+                                            String atualizarVagasSQL = "UPDATE evento SET vagas = vagas - 1 WHERE id = ?";
+                                            PreparedStatement stmAtualizarVagas = con.prepareStatement(atualizarVagasSQL);
+                                            stmAtualizarVagas.setInt(1, IdEvento);
+                                            int linhasAfetadas = stmAtualizarVagas.executeUpdate();
+                                            
+                                            if (linhasAfetadas > 0) {
+                                                System.out.println("Número de vagas atualizado com sucesso.");
+                                            } else {
+                                                System.out.println("Erro ao atualizar o número de vagas.");
+                                            }
+                                            
+                                            stmAtualizarVagas.close();
+                                            break; // Adicionado o break aqui
+                                        } else {
+                                            System.out.println("Erro ao associar participante ao evento.");
+                                        }
+                                    
+                                        stmInserirEventoParticipante.close();
+                                    } else {
+                                        System.out.println("Operação cancelada.");
+                                    }
                                 }
-                            
-                                stmInserirEventoParticipante.close();
+                
+                                rsDuplicata.close();
+                                stmVerificarDuplicata.close();
                             } else {
-                                System.out.println("Operação cancelada.");
+                                System.out.println("Não há vagas disponíveis para este evento.");
+                                break; // Adicionado o break aqui
                             }
+                        } else {
+                            System.out.println("Evento não encontrado. Tente novamente.");
                         }
-
-                        rsDuplicata.close();
-                        stmVerificarDuplicata.close();
-                        con.close();
-
-                    } catch (SQLException e) {
-                        System.out.println("Erro ao acessar o banco de dados: " + e.getMessage());
-                    } catch (Exception e) {
-                        System.out.println("Erro inesperado: " + e.getMessage());
+                
+                        rsEvento.close();
+                        stmBuscarEvento.close();
                     }
-                    break;
-                               
-                    case 6:
+                
+                    // Fecha a conexão fora dos loops, garantindo que seja chamado
+                    con.close();
+                
+                } catch (SQLException e) {
+                    System.out.println("Erro ao acessar o banco de dados: " + e.getMessage());
+                } catch (Exception e) {
+                    System.out.println("Erro inesperado: " + e.getMessage());
+                }
+                
+                break;
+                case 6:
                     try {
                         System.out.println("Informe o ID do participante que deseja alterar:");
                         int idParticipante = scanner.nextInt();
@@ -458,7 +478,7 @@ public class Main {
                         System.out.println("Erro inesperado: " + e.getMessage());
                     }
                     break;
-                    case 7:
+                case 7:
                     try {
                         System.out.println("Informe o ID do organizador que deseja alterar:");
                         int idOrganizador = scanner.nextInt();
