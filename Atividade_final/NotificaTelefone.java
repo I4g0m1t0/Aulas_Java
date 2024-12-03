@@ -14,9 +14,20 @@ public class NotificaTelefone extends Notifica {
         this.telefoneDestino = telefoneDestino;
     }
 
+    // Método para validar o formato do telefone (opcional)
+    public boolean validarTelefone() {
+        // Um exemplo simples de validação de número de telefone (a lógica pode ser expandida)
+        return telefoneDestino != null && telefoneDestino.matches("\\+?\\d{10,15}");
+    }
+
     @Override
     public void enviar() {
-        System.out.println("Enviando SMS para: " + telefoneDestino + " com texto: " + getTexto());
+        // Valida o telefone antes de enviar
+        if (validarTelefone()) {
+            System.out.println("Enviando SMS para: " + telefoneDestino + " com texto: " + getTexto());
+        } else {
+            System.out.println("Erro: Número de telefone inválido.");
+        }
     }
 
     @Override
