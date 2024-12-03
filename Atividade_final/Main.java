@@ -295,126 +295,126 @@ public class Main {
                     }
                     break;
                 case 5:
-                try {
-                    Connection con = DriverManager.getConnection(url, user, password);
-                
-                    int IdEvento, IdParticipante;
-                    String nomeParticipante = "", descricaoEvento = "";
-                
-                    // Verificar o participante
-                    while (true) {
-                        System.out.println("Informe o ID do Participante:");
-                        IdParticipante = scanner.nextInt();
-                        
-                        String buscarParticipanteSQL = "SELECT * FROM participante WHERE id = ?";
-                        PreparedStatement stmBuscarParticipante = con.prepareStatement(buscarParticipanteSQL);
-                        stmBuscarParticipante.setInt(1, IdParticipante);
-                        ResultSet rsParticipante = stmBuscarParticipante.executeQuery();
-                
-                        if (rsParticipante.next()) {
-                            nomeParticipante = rsParticipante.getString("nome");
-                            System.out.println("Participante encontrado: " + nomeParticipante);
-                            rsParticipante.close();
-                            stmBuscarParticipante.close();
-                            break;
-                        } else {
-                            System.out.println("Participante não encontrado. Tente novamente.");
+                    try {
+                        Connection con = DriverManager.getConnection(url, user, password);
+                    
+                        int IdEvento, IdParticipante;
+                        String nomeParticipante = "", descricaoEvento = "";
+                    
+                        // Verificar o participante
+                        while (true) {
+                            System.out.println("Informe o ID do Participante:");
+                            IdParticipante = scanner.nextInt();
+                            
+                            String buscarParticipanteSQL = "SELECT * FROM participante WHERE id = ?";
+                            PreparedStatement stmBuscarParticipante = con.prepareStatement(buscarParticipanteSQL);
+                            stmBuscarParticipante.setInt(1, IdParticipante);
+                            ResultSet rsParticipante = stmBuscarParticipante.executeQuery();
+                    
+                            if (rsParticipante.next()) {
+                                nomeParticipante = rsParticipante.getString("nome");
+                                System.out.println("Participante encontrado: " + nomeParticipante);
+                                rsParticipante.close();
+                                stmBuscarParticipante.close();
+                                break;
+                            } else {
+                                System.out.println("Participante não encontrado. Tente novamente.");
+                            }
                         }
-                    }
-                
-                    // Verificar o evento
-                    while (true) {
-                        System.out.println("Informe o ID do evento que ele irá participar:");
-                        IdEvento = scanner.nextInt();
-                        String buscarEventoSQL = "SELECT * FROM evento WHERE id = ?";
-                        PreparedStatement stmBuscarEvento = con.prepareStatement(buscarEventoSQL);
-                        stmBuscarEvento.setInt(1, IdEvento);
-                        ResultSet rsEvento = stmBuscarEvento.executeQuery();
-                
-                        if (rsEvento.next()) {
-                            descricaoEvento = rsEvento.getString("descricao");
-                            int vagasDisponiveis = rsEvento.getInt("vagas");
-                            System.out.println("Evento encontrado: " + descricaoEvento);
-                            System.out.println("Vagas disponíveis: " + vagasDisponiveis);
+                    
+                        // Verificar o evento
+                        while (true) {
+                            System.out.println("Informe o ID do evento que ele irá participar:");
+                            IdEvento = scanner.nextInt();
+                            String buscarEventoSQL = "SELECT * FROM evento WHERE id = ?";
+                            PreparedStatement stmBuscarEvento = con.prepareStatement(buscarEventoSQL);
+                            stmBuscarEvento.setInt(1, IdEvento);
+                            ResultSet rsEvento = stmBuscarEvento.executeQuery();
+                    
+                            if (rsEvento.next()) {
+                                descricaoEvento = rsEvento.getString("descricao");
+                                int vagasDisponiveis = rsEvento.getInt("vagas");
+                                System.out.println("Evento encontrado: " + descricaoEvento);
+                                System.out.println("Vagas disponíveis: " + vagasDisponiveis);
+                                rsEvento.close();
+                                stmBuscarEvento.close();
+                    
+                                if (vagasDisponiveis > 0) {
+                                    // Verificar se a associação já existe
+                                    String verificarDuplicataSQL = "SELECT * FROM evento_participante WHERE evento_id = ? AND participante_id = ?";
+                                    PreparedStatement stmVerificarDuplicata = con.prepareStatement(verificarDuplicataSQL);
+                                    stmVerificarDuplicata.setInt(1, IdEvento);
+                                    stmVerificarDuplicata.setInt(2, IdParticipante);
+                                    ResultSet rsDuplicata = stmVerificarDuplicata.executeQuery();
+                    
+                                    if (rsDuplicata.next()) {
+                                        System.out.printf("O participante '%s' já está associado a este evento. Operação cancelada.", nomeParticipante);
+                                        break; // Adicionado o break aqui
+                                    } else {
+                                        // Inserir a associação apenas se não for duplicada
+                                        
+                                        // Confirmação antes de inserir
+                                        System.out.printf("Deseja inserir o participante '%s' no evento '%s'? (s/n): ", nomeParticipante, descricaoEvento);
+                                        String confirmacao = scanner.next();
+                                        
+                                        if (confirmacao.equalsIgnoreCase("s")) {
+                                            String InserirEventoParticipanteSql = "INSERT INTO evento_participante (evento_id, participante_id) VALUES (?, ?)";
+                                            PreparedStatement stmInserirEventoParticipante = con.prepareStatement(InserirEventoParticipanteSql, PreparedStatement.RETURN_GENERATED_KEYS);
+                                        
+                                            stmInserirEventoParticipante.setInt(1, IdEvento);
+                                            stmInserirEventoParticipante.setInt(2, IdParticipante);
+                                        
+                                            if (stmInserirEventoParticipante.executeUpdate() > 0) {
+                                                System.out.println("Participante associado ao evento com sucesso!");
+                                                
+                                                // Atualizar o número de vagas disponíveis
+                                                String atualizarVagasSQL = "UPDATE evento SET vagas = vagas - 1 WHERE id = ?";
+                                                PreparedStatement stmAtualizarVagas = con.prepareStatement(atualizarVagasSQL);
+                                                stmAtualizarVagas.setInt(1, IdEvento);
+                                                int linhasAfetadas = stmAtualizarVagas.executeUpdate();
+                                                
+                                                if (linhasAfetadas > 0) {
+                                                    System.out.println("Número de vagas atualizado com sucesso.");
+                                                } else {
+                                                    System.out.println("Erro ao atualizar o número de vagas.");
+                                                }
+                                                
+                                                stmAtualizarVagas.close();
+                                                break; // Adicionado o break aqui
+                                            } else {
+                                                System.out.println("Erro ao associar participante ao evento.");
+                                            }
+                                        
+                                            stmInserirEventoParticipante.close();
+                                        } else {
+                                            System.out.println("Operação cancelada.");
+                                        }
+                                    }
+                    
+                                    rsDuplicata.close();
+                                    stmVerificarDuplicata.close();
+                                } else {
+                                    System.out.println("Não há vagas disponíveis para este evento.");
+                                    break; // Adicionado o break aqui
+                                }
+                            } else {
+                                System.out.println("Evento não encontrado. Tente novamente.");
+                            }
+                    
                             rsEvento.close();
                             stmBuscarEvento.close();
-                
-                            if (vagasDisponiveis > 0) {
-                                // Verificar se a associação já existe
-                                String verificarDuplicataSQL = "SELECT * FROM evento_participante WHERE evento_id = ? AND participante_id = ?";
-                                PreparedStatement stmVerificarDuplicata = con.prepareStatement(verificarDuplicataSQL);
-                                stmVerificarDuplicata.setInt(1, IdEvento);
-                                stmVerificarDuplicata.setInt(2, IdParticipante);
-                                ResultSet rsDuplicata = stmVerificarDuplicata.executeQuery();
-                
-                                if (rsDuplicata.next()) {
-                                    System.out.printf("O participante '%s' já está associado a este evento. Operação cancelada.", nomeParticipante);
-                                    break; // Adicionado o break aqui
-                                } else {
-                                    // Inserir a associação apenas se não for duplicada
-                                    
-                                    // Confirmação antes de inserir
-                                    System.out.printf("Deseja inserir o participante '%s' no evento '%s'? (s/n): ", nomeParticipante, descricaoEvento);
-                                    String confirmacao = scanner.next();
-                                    
-                                    if (confirmacao.equalsIgnoreCase("s")) {
-                                        String InserirEventoParticipanteSql = "INSERT INTO evento_participante (evento_id, participante_id) VALUES (?, ?)";
-                                        PreparedStatement stmInserirEventoParticipante = con.prepareStatement(InserirEventoParticipanteSql, PreparedStatement.RETURN_GENERATED_KEYS);
-                                    
-                                        stmInserirEventoParticipante.setInt(1, IdEvento);
-                                        stmInserirEventoParticipante.setInt(2, IdParticipante);
-                                    
-                                        if (stmInserirEventoParticipante.executeUpdate() > 0) {
-                                            System.out.println("Participante associado ao evento com sucesso!");
-                                            
-                                            // Atualizar o número de vagas disponíveis
-                                            String atualizarVagasSQL = "UPDATE evento SET vagas = vagas - 1 WHERE id = ?";
-                                            PreparedStatement stmAtualizarVagas = con.prepareStatement(atualizarVagasSQL);
-                                            stmAtualizarVagas.setInt(1, IdEvento);
-                                            int linhasAfetadas = stmAtualizarVagas.executeUpdate();
-                                            
-                                            if (linhasAfetadas > 0) {
-                                                System.out.println("Número de vagas atualizado com sucesso.");
-                                            } else {
-                                                System.out.println("Erro ao atualizar o número de vagas.");
-                                            }
-                                            
-                                            stmAtualizarVagas.close();
-                                            break; // Adicionado o break aqui
-                                        } else {
-                                            System.out.println("Erro ao associar participante ao evento.");
-                                        }
-                                    
-                                        stmInserirEventoParticipante.close();
-                                    } else {
-                                        System.out.println("Operação cancelada.");
-                                    }
-                                }
-                
-                                rsDuplicata.close();
-                                stmVerificarDuplicata.close();
-                            } else {
-                                System.out.println("Não há vagas disponíveis para este evento.");
-                                break; // Adicionado o break aqui
-                            }
-                        } else {
-                            System.out.println("Evento não encontrado. Tente novamente.");
                         }
-                
-                        rsEvento.close();
-                        stmBuscarEvento.close();
+                    
+                        // Fecha a conexão fora dos loops, garantindo que seja chamado
+                        con.close();
+                    
+                    } catch (SQLException e) {
+                        System.out.println("Erro ao acessar o banco de dados: " + e.getMessage());
+                    } catch (Exception e) {
+                        System.out.println("Erro inesperado: " + e.getMessage());
                     }
-                
-                    // Fecha a conexão fora dos loops, garantindo que seja chamado
-                    con.close();
-                
-                } catch (SQLException e) {
-                    System.out.println("Erro ao acessar o banco de dados: " + e.getMessage());
-                } catch (Exception e) {
-                    System.out.println("Erro inesperado: " + e.getMessage());
-                }
-                
-                break;
+                    
+                    break;
                 case 6:
                     try {
                         System.out.println("Informe o ID do participante que deseja alterar:");
@@ -531,8 +531,7 @@ public class Main {
                     } catch (SQLException e) {
                         System.out.println("Erro ao acessar o banco de dados: " + e.getMessage());
                     }
-                    break;
-                
+                    break;               
                 case 8:
                     try {
                         System.out.println("Informe o ID do local que deseja alterar:");
@@ -585,136 +584,134 @@ public class Main {
                     } catch (SQLException e) {
                         System.out.println("Erro ao acessar o banco de dados: " + e.getMessage());
                     }
-                    break;
-                
+                    break;               
                 case 9:
-                try {
-                    Connection con = DriverManager.getConnection(url, user, password);
-                    int vagasEvento;
-                
-                    // Solicitar ID do evento a ser atualizado
-                    System.out.println("Informe o ID do evento a ser atualizado:");
-                    int eventoId = scanner.nextInt();
-                    scanner.nextLine(); // Limpar o buffer após o nextInt
-                
-                    // Verificar se o evento existe
-                    String buscarEventoSQL = "SELECT * FROM Evento WHERE id = ?";
-                    PreparedStatement stmBuscarEvento = con.prepareStatement(buscarEventoSQL);
-                    stmBuscarEvento.setInt(1, eventoId);
-                    ResultSet rsEvento = stmBuscarEvento.executeQuery();
-                
-                    if (rsEvento.next()) {
-                        System.out.println("Evento encontrado: " + rsEvento.getString("descricao"));
-                
-                        // Atualizar dados do evento
-                        System.out.println("Informe a nova descrição do evento (pressione Enter para manter a descrição atual):");
-                        String descricaoEvento = scanner.nextLine();
-                        if (descricaoEvento.isEmpty()) {
-                            descricaoEvento = rsEvento.getString("descricao");  // Mantém a descrição atual se o usuário pressionar Enter
-                        }
-                
-                        // Solicitar nova data do evento
-                        String dataEvento;
-                        while (true) {
-                            System.out.println("Informe a nova data do evento (yyyy-MM-dd HH:mm:ss) ou pressione Enter para manter a data atual:");
-                            dataEvento = scanner.nextLine();
-                            
-                            if (dataEvento.isEmpty()) {
-                                dataEvento = rsEvento.getString("data").toString();  // Mantém a data atual se o usuário pressionar Enter
-                                break;
+                    try {
+                        Connection con = DriverManager.getConnection(url, user, password);
+                        int vagasEvento;
+                    
+                        // Solicitar ID do evento a ser atualizado
+                        System.out.println("Informe o ID do evento a ser atualizado:");
+                        int eventoId = scanner.nextInt();
+                        scanner.nextLine(); // Limpar o buffer após o nextInt
+                    
+                        // Verificar se o evento existe
+                        String buscarEventoSQL = "SELECT * FROM Evento WHERE id = ?";
+                        PreparedStatement stmBuscarEvento = con.prepareStatement(buscarEventoSQL);
+                        stmBuscarEvento.setInt(1, eventoId);
+                        ResultSet rsEvento = stmBuscarEvento.executeQuery();
+                    
+                        if (rsEvento.next()) {
+                            System.out.println("Evento encontrado: " + rsEvento.getString("descricao"));
+                    
+                            // Atualizar dados do evento
+                            System.out.println("Informe a nova descrição do evento (pressione Enter para manter a descrição atual):");
+                            String descricaoEvento = scanner.nextLine();
+                            if (descricaoEvento.isEmpty()) {
+                                descricaoEvento = rsEvento.getString("descricao");  // Mantém a descrição atual se o usuário pressionar Enter
                             }
-                
-                            try {
-                                // Validar o formato da data
-                                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                                LocalDateTime dataEventoFormatada = LocalDateTime.parse(dataEvento, formatter);
-                
-                                // Verificar se a nova data já está no banco de dados
-                                String verificarDataSQL = "SELECT COUNT(*) AS total FROM Evento WHERE DATE(data) = ? AND local_id = ?";
-                                PreparedStatement stmVerificarData = con.prepareStatement(verificarDataSQL);
-                                stmVerificarData.setDate(1, java.sql.Date.valueOf(dataEventoFormatada.toLocalDate()));
-                                stmVerificarData.setInt(2, rsEvento.getInt("local_id"));
-                                ResultSet rsData = stmVerificarData.executeQuery();
-                
-                                if (rsData.next() && rsData.getInt("total") > 0) {
-                                    System.out.println("Data já cadastrada para este local. Escolha outra data.");
-                                } else {
-                                    System.out.println("Data válida.");
-                                    rsData.close();
-                                    stmVerificarData.close();
+                    
+                            // Solicitar nova data do evento
+                            String dataEvento;
+                            while (true) {
+                                System.out.println("Informe a nova data do evento (yyyy-MM-dd HH:mm:ss) ou pressione Enter para manter a data atual:");
+                                dataEvento = scanner.nextLine();
+                                
+                                if (dataEvento.isEmpty()) {
+                                    dataEvento = rsEvento.getString("data").toString();  // Mantém a data atual se o usuário pressionar Enter
                                     break;
                                 }
-                
-                                rsData.close();
-                                stmVerificarData.close();
-                            } catch (DateTimeParseException e) {
-                                System.out.println("Data inválida! Por favor, use o formato yyyy-MM-dd HH:mm:ss.");
-                            } catch (SQLException e) {
-                                System.out.println("Erro ao verificar a data no banco de dados: " + e.getMessage());
-                            }
-                        }
-                
-                        // Solicitar nova quantidade de vagas
-                        System.out.println("Informe o novo número de vagas para o evento (pressione Enter para manter o número atual):");
-                        String vagasInput = scanner.nextLine();
-                        if (vagasInput.isEmpty()) {
-                            vagasEvento = rsEvento.getInt("vagas");  // Mantém o número de vagas atual se o usuário pressionar Enter
-                        } else {
-                            vagasEvento = Integer.parseInt(vagasInput);
-                            
-                            // Verificar se o número de vagas excede o limite disponível no local
-                            String buscarLocalSQL = "SELECT * FROM Local WHERE id = ?";
-                            PreparedStatement stmBuscarLocal = con.prepareStatement(buscarLocalSQL);
-                            stmBuscarLocal.setInt(1, rsEvento.getInt("local_id"));
-                            ResultSet rsLocal = stmBuscarLocal.executeQuery();
-                
-                            if (rsLocal.next()) {
-                                int vagasDisponiveis = rsLocal.getInt("vagas");
-                                if (vagasEvento > vagasDisponiveis) {
-                                    System.out.println("Número de vagas excede o limite do local. O número de vagas será ajustado para " + vagasDisponiveis);
-                                    vagasEvento = vagasDisponiveis;  // Ajusta o número de vagas para o limite disponível
+                    
+                                try {
+                                    // Validar o formato da data
+                                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                                    LocalDateTime dataEventoFormatada = LocalDateTime.parse(dataEvento, formatter);
+                    
+                                    // Verificar se a nova data já está no banco de dados
+                                    String verificarDataSQL = "SELECT COUNT(*) AS total FROM Evento WHERE DATE(data) = ? AND local_id = ?";
+                                    PreparedStatement stmVerificarData = con.prepareStatement(verificarDataSQL);
+                                    stmVerificarData.setDate(1, java.sql.Date.valueOf(dataEventoFormatada.toLocalDate()));
+                                    stmVerificarData.setInt(2, rsEvento.getInt("local_id"));
+                                    ResultSet rsData = stmVerificarData.executeQuery();
+                    
+                                    if (rsData.next() && rsData.getInt("total") > 0) {
+                                        System.out.println("Data já cadastrada para este local. Escolha outra data.");
+                                    } else {
+                                        System.out.println("Data válida.");
+                                        rsData.close();
+                                        stmVerificarData.close();
+                                        break;
+                                    }
+                    
+                                    rsData.close();
+                                    stmVerificarData.close();
+                                } catch (DateTimeParseException e) {
+                                    System.out.println("Data inválida! Por favor, use o formato yyyy-MM-dd HH:mm:ss.");
+                                } catch (SQLException e) {
+                                    System.out.println("Erro ao verificar a data no banco de dados: " + e.getMessage());
                                 }
                             }
-                
-                            rsLocal.close();
-                            stmBuscarLocal.close();
-                        }
-                
-                        // Atualizar o evento no banco de dados
-                        String atualizarEventoSQL = "UPDATE Evento SET descricao = ?, data = ?, vagas = ? WHERE id = ?";
-                        PreparedStatement stmAtualizarEvento = con.prepareStatement(atualizarEventoSQL);
-                
-                        // Convertendo a string da data para LocalDateTime
-                        LocalDateTime dataEventoParsed = LocalDateTime.parse(dataEvento, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                
-                        stmAtualizarEvento.setString(1, descricaoEvento);
-                        stmAtualizarEvento.setTimestamp(2, Timestamp.valueOf(dataEventoParsed));
-                        stmAtualizarEvento.setInt(3, vagasEvento);
-                        stmAtualizarEvento.setInt(4, eventoId);
-                
-                        if (stmAtualizarEvento.executeUpdate() > 0) {
-                            System.out.println("Evento atualizado com sucesso!");
+                    
+                            // Solicitar nova quantidade de vagas
+                            System.out.println("Informe o novo número de vagas para o evento (pressione Enter para manter o número atual):");
+                            String vagasInput = scanner.nextLine();
+                            if (vagasInput.isEmpty()) {
+                                vagasEvento = rsEvento.getInt("vagas");  // Mantém o número de vagas atual se o usuário pressionar Enter
+                            } else {
+                                vagasEvento = Integer.parseInt(vagasInput);
+                                
+                                // Verificar se o número de vagas excede o limite disponível no local
+                                String buscarLocalSQL = "SELECT * FROM Local WHERE id = ?";
+                                PreparedStatement stmBuscarLocal = con.prepareStatement(buscarLocalSQL);
+                                stmBuscarLocal.setInt(1, rsEvento.getInt("local_id"));
+                                ResultSet rsLocal = stmBuscarLocal.executeQuery();
+                    
+                                if (rsLocal.next()) {
+                                    int vagasDisponiveis = rsLocal.getInt("vagas");
+                                    if (vagasEvento > vagasDisponiveis) {
+                                        System.out.println("Número de vagas excede o limite do local. O número de vagas será ajustado para " + vagasDisponiveis);
+                                        vagasEvento = vagasDisponiveis;  // Ajusta o número de vagas para o limite disponível
+                                    }
+                                }
+                    
+                                rsLocal.close();
+                                stmBuscarLocal.close();
+                            }
+                    
+                            // Atualizar o evento no banco de dados
+                            String atualizarEventoSQL = "UPDATE Evento SET descricao = ?, data = ?, vagas = ? WHERE id = ?";
+                            PreparedStatement stmAtualizarEvento = con.prepareStatement(atualizarEventoSQL);
+                    
+                            // Convertendo a string da data para LocalDateTime
+                            LocalDateTime dataEventoParsed = LocalDateTime.parse(dataEvento, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                    
+                            stmAtualizarEvento.setString(1, descricaoEvento);
+                            stmAtualizarEvento.setTimestamp(2, Timestamp.valueOf(dataEventoParsed));
+                            stmAtualizarEvento.setInt(3, vagasEvento);
+                            stmAtualizarEvento.setInt(4, eventoId);
+                    
+                            if (stmAtualizarEvento.executeUpdate() > 0) {
+                                System.out.println("Evento atualizado com sucesso!");
+                            } else {
+                                System.out.println("Erro ao atualizar o evento.");
+                            }
+                    
+                            // Fechar conexões
+                            stmAtualizarEvento.close();
+                            rsEvento.close();
+                            stmBuscarEvento.close();
                         } else {
-                            System.out.println("Erro ao atualizar o evento.");
+                            System.out.println("Evento não encontrado.");
                         }
-                
-                        // Fechar conexões
-                        stmAtualizarEvento.close();
-                        rsEvento.close();
-                        stmBuscarEvento.close();
-                    } else {
-                        System.out.println("Evento não encontrado.");
-                    }
-                
-                    con.close();
-                
-                } catch (SQLException e) {
-                    System.out.println("Erro ao acessar o banco de dados: " + e.getMessage());
-                } catch (Exception e) {
-                    System.out.println("Erro inesperado: " + e.getMessage());
-                }
-                
-                break;
+                    
+                        con.close();
+                    
+                    } catch (SQLException e) {
+                        System.out.println("Erro ao acessar o banco de dados: " + e.getMessage());
+                    } catch (Exception e) {
+                        System.out.println("Erro inesperado: " + e.getMessage());
+                    }                   
+                    break;
                 case 10:
                     try {
                         System.out.println("Informe o ID do Participante que deseja excluir:");
@@ -792,8 +789,7 @@ public class Main {
                     } catch (Exception e) {
                         System.out.println("Erro inesperado: " + e.getMessage());
                     }
-                    break;
-                
+                    break;               
                 case 13:
                     try {
                         System.out.println("Informe o ID do Evento que deseja excluir:");
@@ -819,8 +815,7 @@ public class Main {
                     } catch (Exception e) {
                         System.out.println("Erro inesperado: " + e.getMessage());
                     }
-                    break;
-                
+                    break;                
                 case 14:
                     try {
                         System.out.println("Informe o ID do Evento:");
@@ -830,18 +825,33 @@ public class Main {
                         
                         Connection con = DriverManager.getConnection(url, user, password);
                         
+                        // Excluir a associação entre o participante e o evento
                         String deleteEventoParticipanteSQL = "DELETE FROM evento_participante WHERE evento_id = ? AND participante_id = ?";
                         PreparedStatement psExcluirEventoParticipante = con.prepareStatement(deleteEventoParticipanteSQL);
                         psExcluirEventoParticipante.setInt(1, idEvento);
                         psExcluirEventoParticipante.setInt(2, idParticipante);
-                
+                        
                         int rowsAffected = psExcluirEventoParticipante.executeUpdate();
                         if (rowsAffected > 0) {
                             System.out.println("Associação entre participante e evento excluída com sucesso!");
+                            
+                            // Atualizar o número de vagas disponíveis
+                            String atualizarVagasSQL = "UPDATE evento SET vagas = vagas + 1 WHERE id = ?";
+                            PreparedStatement psAtualizarVagas = con.prepareStatement(atualizarVagasSQL);
+                            psAtualizarVagas.setInt(1, idEvento);
+                            
+                            int vagasAtualizadas = psAtualizarVagas.executeUpdate();
+                            if (vagasAtualizadas > 0) {
+                                System.out.println("Número de vagas atualizado com sucesso!");
+                            } else {
+                                System.out.println("Erro ao atualizar o número de vagas.");
+                            }
+                            
+                            psAtualizarVagas.close();
                         } else {
                             System.out.println("Nenhuma associação encontrada com os IDs informados.");
                         }
-                
+                    
                         psExcluirEventoParticipante.close();
                         con.close();
                     } catch (SQLException e) {
@@ -849,7 +859,7 @@ public class Main {
                     } catch (Exception e) {
                         System.out.println("Erro inesperado: " + e.getMessage());
                     }
-                    break;
+                    break;                
                 case 15:
                     try {
                         Connection con = DriverManager.getConnection(url, user, password);
@@ -875,7 +885,7 @@ public class Main {
                     } catch (SQLException e) {
                         System.out.println("Erro de SQL: " + e.getMessage());
                     }
-                break;
+                    break;
                 case 16:
                     try {
                         Connection con = DriverManager.getConnection(url, user, password);
@@ -901,7 +911,7 @@ public class Main {
                     } catch (SQLException e) {
                         System.out.println("Erro de SQL: " + e.getMessage());
                     }
-                break;
+                    break;
                 case 17:
                     try {
                         Connection con = DriverManager.getConnection(url, user, password);
@@ -961,7 +971,7 @@ public class Main {
                     } catch (SQLException e) {
                         System.out.println("Erro de SQL: " + e.getMessage());
                     }
-                break;
+                    break;
                 case 18:
                     try (Connection con = DriverManager.getConnection(url, user, password)) {
                         // Solicita o ID do evento ao usuário
@@ -1035,7 +1045,7 @@ public class Main {
                     } catch (NumberFormatException e) {
                         System.out.println("ID do evento inválido.");
                     }
-                break;
+                    break;
             }
         } while (menu != 0);
         scanner.close();
