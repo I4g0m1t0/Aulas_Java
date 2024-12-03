@@ -49,4 +49,13 @@ public class Local {
     public void removerEvento(Evento evento) {
         this.eventos.remove(evento);
     }
+
+    @Override
+    public String toString() {
+        return "Local ID: " + id +
+            ", Descrição: " + descricao +
+            ", Vagas: " + vagas +
+            ", Eventos: " + (eventos.isEmpty() ? "Nenhum evento" : eventos);
+    }
+
 }

@@ -865,13 +865,13 @@ public class Main {
                         while (sql.next()) {
                             int id = sql.getInt("id");
                             String nome = sql.getString("nome");
-                            String telefone = sql.getString("email");
+                            String email = sql.getString("email");
                             int notificacoesDb = sql.getInt("notificacao_id");
                     
                             // Usa o método estático para criar uma instância de Notifica
                             Notifica notificacao = Notifica.fromInt(notificacoesDb);
                     
-                            Organizador organizador = new Organizador(id, nome, telefone, notificacao);
+                            Organizador organizador = new Organizador(id, nome, email, notificacao);
                             System.out.println(organizador);
                         }
                     
@@ -881,7 +881,31 @@ public class Main {
                     } catch (SQLException e) {
                         System.out.println("Erro de SQL: " + e.getMessage());
                     }
-                break;          
+                break;
+                case 17:
+                    try {
+                        Connection con = DriverManager.getConnection(url, user, password);
+                        PreparedStatement stm = con.prepareStatement("SELECT * FROM local;");
+                        ResultSet sql = stm.executeQuery();
+                    
+                        while (sql.next()) {
+                            int id = sql.getInt("id"); // Obtém o ID do local
+                            String descricao = sql.getString("descricao"); // Obtém a descrição do local
+                            int vagas = sql.getInt("vagas"); // Obtém o número de vagas como inteiro
+                        
+                            // Cria o objeto Local com os valores obtidos
+                            Local local = new Local(id, descricao, vagas);
+                            System.out.println(local); // Imprime o objeto Local, chamando o método toString()
+                        }
+                        
+                    
+                        sql.close();
+                        stm.close();
+                        con.close();
+                    } catch (SQLException e) {
+                        System.out.println("Erro de SQL: " + e.getMessage());
+                    }
+                break;
             }
         } while (menu != 0);
         scanner.close();
