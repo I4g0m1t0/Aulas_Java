@@ -38,6 +38,8 @@ public class Main {
             System.out.println("16. Selecionar organizadores"); //lista de organizadores
             System.out.println("17. Selecionar locais"); //lista de locais
             System.out.println("18. Selecionar evento"); //carrega as informações do evento e os participantes cadastrados
+            System.out.println("19. Notifica Participante");
+            System.out.println("20. Notifica Participante");
 
             try{
                 System.out.print("\nDigite a opção desejada: ");
@@ -1044,6 +1046,79 @@ public class Main {
                         System.out.println("Erro ao conectar ou executar consulta: " + e.getMessage());
                     } catch (NumberFormatException e) {
                         System.out.println("ID do evento inválido.");
+                    }
+                    break;
+                    case 19: // Notifica Participante
+                    System.out.println("Digite o ID do participante que deseja notificar:");
+                    int idParticipante = scanner.nextInt();
+                    scanner.nextLine(); // Limpa o buffer
+
+                    // Conectar ao banco para buscar os dados do participante
+                    try (Connection con = DriverManager.getConnection(url, user, password)) {
+                        String sql = "SELECT * FROM participante WHERE id = ?";
+                        PreparedStatement pst = con.prepareStatement(sql);
+                        pst.setInt(1, idParticipante);
+                        ResultSet rs = pst.executeQuery();
+
+                        if (rs.next()) {
+                            String nomeParticipante = rs.getString("nome");
+                            String telefone = rs.getString("telefone");
+
+                            // Supondo que a notificação do participante seja via telefone (NotificaTelefone)
+                            Notifica notifica = new NotificaTelefone(1, "Você foi notificado para o evento!", telefone);
+                            notifica.enviar(); // Envia a notificação
+
+                            // Inserir a notificação no banco de dados, incluindo o telefone no campo 'destino'
+                            String insertNotificaSQL = "INSERT INTO notifica (texto, destino) VALUES (?, ?)";
+                            PreparedStatement psInserirNotificacao = con.prepareStatement(insertNotificaSQL);
+                            psInserirNotificacao.setString(1, notifica.getTexto());
+                            psInserirNotificacao.setString(2, telefone); // Definindo o telefone como destino
+                            psInserirNotificacao.executeUpdate(); // Executa a inserção
+
+                            System.out.println("Notificação enviada para o participante " + nomeParticipante + " no telefone " + telefone);
+                        } else {
+                            System.out.println("Participante não encontrado.");
+                        }
+                        rs.close();
+                    } catch (SQLException e) {
+                        System.out.println("Erro ao acessar o banco de dados: " + e.getMessage());
+                    }
+                    break;
+
+                case 20: // Notifica Organizador
+                    System.out.println("Digite o ID do organizador que deseja notificar:");
+                    int idOrganizador = scanner.nextInt();
+                    scanner.nextLine(); // Limpa o buffer
+
+                    // Conectar ao banco para buscar os dados do organizador
+                    try (Connection con = DriverManager.getConnection(url, user, password)) {
+                        String sql = "SELECT * FROM organizador WHERE id = ?";
+                        PreparedStatement pst = con.prepareStatement(sql);
+                        pst.setInt(1, idOrganizador);
+                        ResultSet rs = pst.executeQuery();
+
+                        if (rs.next()) {
+                            String nomeOrganizador = rs.getString("nome");
+                            String email = rs.getString("email");
+
+                            // Supondo que a notificação do organizador seja via e-mail (NotificaEmail)
+                            Notifica notifica = new NotificaEmail(1, "Você tem uma nova atualização no evento!", email);
+                            notifica.enviar(); // Envia a notificação
+
+                            // Inserir a notificação no banco de dados, incluindo o e-mail no campo 'destino'
+                            String insertNotificaSQL = "INSERT INTO notifica (texto, destino) VALUES (?, ?)";
+                            PreparedStatement psInserirNotificacao = con.prepareStatement(insertNotificaSQL);
+                            psInserirNotificacao.setString(1, notifica.getTexto());
+                            psInserirNotificacao.setString(2, email); // Definindo o e-mail como destino
+                            psInserirNotificacao.executeUpdate(); // Executa a inserção
+
+                            System.out.println("Notificação enviada para o organizador " + nomeOrganizador + " no e-mail " + email);
+                        } else {
+                            System.out.println("Organizador não encontrado.");
+                        }
+                        rs.close();
+                    } catch (SQLException e) {
+                        System.out.println("Erro ao acessar o banco de dados: " + e.getMessage());
                     }
                     break;
             }
