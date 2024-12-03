@@ -33,8 +33,8 @@ public class Participante extends Pessoa {
 
     @Override
     public String toString() {
-        return super.toString() 
-        + ", Telefone: " + this.telefone 
-        + ", Notificação: " + (notificacao != null ? notificacao.toString() : "Nenhuma");
+        // Exibe os dados do participante, incluindo a notificação
+        String notificacaoTexto = (notificacao != null) ? notificacao.getTexto() : "Sem notificação configurada";
+        return "Id: " + id + ", Nome: " + nome + ", Telefone: " + telefone + ", Notificação: " + notificacaoTexto;
     }
 }
