@@ -31,4 +31,15 @@ public class Notifica {
     public String toString() {
         return "Notificação [ID: " + id + ", Texto: " + texto + "]";
     }
+
+    public static Notifica fromInt(int id) {
+        switch (id) {
+            case 1:
+                return new Notifica(id, "Notificação ativa");
+            case 2:
+                return new Notifica(id, "Notificação pendente");
+            default:
+                return new Notifica(id, "Sem notificação configurada");
+        }
+    }    
 }
